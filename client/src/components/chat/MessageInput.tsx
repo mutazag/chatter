@@ -46,9 +46,10 @@ export function MessageInput({
 
   const submit = () => {
     if (pendingImageUrl) {
-      onSend(pendingImageUrl);
       const trimmed = value.trim();
-      if (trimmed) onSend(trimmed);
+      // Encode as "[img]<url>\ncaption" so image + text arrive in one bubble
+      const content = trimmed ? `[img]${pendingImageUrl}\n${trimmed}` : `[img]${pendingImageUrl}`;
+      onSend(content);
       setPendingImageUrl(null);
       setValue('');
       return;

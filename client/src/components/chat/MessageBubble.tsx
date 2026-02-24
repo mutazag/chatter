@@ -7,8 +7,14 @@ function isRoomMessage(m: AnyMessage): m is Message {
   return 'roomId' in m;
 }
 
-function isImageUrl(content: string): boolean {
-  return content.startsWith('/api/images/');
+function parseContent(content: string): { imageUrl: string | null; text: string | null } {
+  if (content.startsWith('[img]')) {
+    const rest = content.slice('[img]'.length);
+    const newline = rest.indexOf('\n');
+    if (newline === -1) return { imageUrl: rest, text: null };
+    return { imageUrl: rest.slice(0, newline), text: rest.slice(newline + 1) || null };
+  }
+  return { imageUrl: null, text: content };
 }
 
 interface MessageBubbleProps {
@@ -30,16 +36,22 @@ export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
       <div className="message-content">
         {!isOwn && <span className="message-author">{author.username}</span>}
         <div className="message-bubble">
-          {isImageUrl(message.content) ? (
-            <img
-              className="msg-image"
-              src={message.content}
-              alt="image"
-              onClick={() => window.open(message.content, '_blank')}
-            />
-          ) : (
-            <span className="message-text">{message.content}</span>
-          )}
+          {(() => {
+            const { imageUrl, text } = parseContent(message.content);
+            return (
+              <>
+                {imageUrl && (
+                  <img
+                    className="msg-image"
+                    src={imageUrl}
+                    alt="image"
+                    onClick={() => window.open(imageUrl, '_blank')}
+                  />
+                )}
+                {text && <span className="message-text">{text}</span>}
+              </>
+            );
+          })()}
           <span className="message-time">{time}</span>
         </div>
       </div>
