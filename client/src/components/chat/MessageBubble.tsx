@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Avatar } from '../shared/Avatar';
 import type { Message, DirectMessage } from '../../types';
 
@@ -22,6 +23,22 @@ interface MessageBubbleProps {
   currentUserId: string;
 }
 
+function MessageImage({ src }: { src: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className="msg-image-wrap">
+      {!loaded && <div className="skeleton msg-image-skeleton" />}
+      <img
+        className={`msg-image ${loaded ? 'msg-image-loaded' : 'msg-image-loading'}`}
+        src={src}
+        alt="image"
+        onLoad={() => setLoaded(true)}
+        onClick={() => window.open(src, '_blank')}
+      />
+    </div>
+  );
+}
+
 export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
   const author = isRoomMessage(message) ? message.author : message.sender;
   const isOwn = author.id === currentUserId;
@@ -40,14 +57,7 @@ export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
             const { imageUrl, text } = parseContent(message.content);
             return (
               <>
-                {imageUrl && (
-                  <img
-                    className="msg-image"
-                    src={imageUrl}
-                    alt="image"
-                    onClick={() => window.open(imageUrl, '_blank')}
-                  />
-                )}
+                {imageUrl && <MessageImage src={imageUrl} />}
                 {text && <span className="message-text">{text}</span>}
               </>
             );

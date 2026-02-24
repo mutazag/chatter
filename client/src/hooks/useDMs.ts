@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSocket } from './useSocket';
 import { useAuth } from './useAuth';
 import { useChatStore } from '../store/chatStore';
@@ -20,6 +20,7 @@ export function useDMs(partnerId: string | null) {
   } = useChatStore();
 
   const messages = partnerId ? (dmMessages[partnerId] ?? []) : [];
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load conversations list
   useEffect(() => {
@@ -33,13 +34,18 @@ export function useDMs(partnerId: string | null) {
   // Load DM history when partner changes
   useEffect(() => {
     if (!partnerId) return;
-    if (dmMessages[partnerId]) return;
+    setIsLoading(true);
+    if (dmMessages[partnerId]) {
+      setIsLoading(false);
+      return;
+    }
 
     dmApi
       .getDMHistory(partnerId)
       .then((msgs) => setDMMessages(partnerId, msgs))
-      .catch(console.error);
-  }, [partnerId, dmMessages, setDMMessages]);
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, [partnerId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Socket listeners for incoming DMs and typing — only when a conversation is open
   useEffect(() => {
@@ -93,5 +99,5 @@ export function useDMs(partnerId: string | null) {
     [socket, partnerId],
   );
 
-  return { conversations, messages, loadMore, sendDM, sendTyping };
+  return { conversations, messages, isLoading, loadMore, sendDM, sendTyping };
 }

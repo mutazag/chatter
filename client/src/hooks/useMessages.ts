@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSocket } from './useSocket';
 import { useChatStore } from '../store/chatStore';
 import * as roomsApi from '../api/roomsApi';
@@ -8,19 +8,25 @@ export function useMessages(roomId: string | null) {
   const { socket } = useSocket();
   const { roomMessages, setRoomMessages, addRoomMessage, prependRoomMessages, setRoomTyping } =
     useChatStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   const messages = roomId ? (roomMessages[roomId] ?? []) : [];
 
   // Load initial history
   useEffect(() => {
     if (!roomId) return;
-    if (roomMessages[roomId]) return; // already loaded
+    setIsLoading(true);
+    if (roomMessages[roomId]) {
+      setIsLoading(false);
+      return;
+    }
 
     roomsApi
       .getRoomMessages(roomId)
       .then((msgs) => setRoomMessages(roomId, msgs))
-      .catch(console.error);
-  }, [roomId, roomMessages, setRoomMessages]);
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, [roomId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Socket subscription
   useEffect(() => {

@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { MessageBubble } from '../chat/MessageBubble';
 import { MessageInput } from '../chat/MessageInput';
 import { TypingIndicator } from '../chat/TypingIndicator';
+import { MessageSkeleton } from '../chat/MessageSkeleton';
 import { Spinner } from '../shared/Spinner';
 import { Avatar } from '../shared/Avatar';
 
@@ -16,7 +17,7 @@ interface DMWindowProps {
 
 export function DMWindow({ partnerId, partnerUsername, partnerAvatarUrl }: DMWindowProps) {
   const { user } = useAuth();
-  const { messages, loadMore, sendDM, sendTyping } = useDMs(partnerId);
+  const { messages, isLoading, loadMore, sendDM, sendTyping } = useDMs(partnerId);
   const isTyping = useChatStore((s) => s.dmTyping[partnerId] ?? false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,12 +40,15 @@ export function DMWindow({ partnerId, partnerUsername, partnerAvatarUrl }: DMWin
         <span className="chat-room-name">{partnerUsername}</span>
       </div>
       <div className="chat-messages" ref={containerRef} onScroll={handleScroll}>
-        {messages.length === 0 && (
+        {isLoading ? (
+          <MessageSkeleton />
+        ) : messages.length === 0 ? (
           <p className="chat-empty">Start a conversation with {partnerUsername}</p>
+        ) : (
+          messages.map((msg) => (
+            <MessageBubble key={msg.id} message={msg} currentUserId={user.id} />
+          ))
         )}
-        {messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} currentUserId={user.id} />
-        ))}
         <div ref={bottomRef} />
       </div>
       <TypingIndicator usernames={isTyping ? [partnerUsername] : []} />
