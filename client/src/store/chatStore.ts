@@ -19,6 +19,12 @@ interface ChatState {
   setRoomMessages: (roomId: string, messages: Message[]) => void;
   prependRoomMessages: (roomId: string, messages: Message[]) => void;
 
+  // Loading flags
+  roomsLoading: boolean;
+  setRoomsLoading: (v: boolean) => void;
+  conversationsLoading: boolean;
+  setConversationsLoading: (v: boolean) => void;
+
   // DM conversations
   conversations: DMConversation[];
   setConversations: (convs: DMConversation[]) => void;
@@ -69,6 +75,12 @@ export const useChatStore = create<ChatState>((set) => ({
         [roomId]: [...messages, ...(s.roomMessages[roomId] ?? [])],
       },
     })),
+
+  // Loading flags
+  roomsLoading: true,
+  setRoomsLoading: (roomsLoading) => set({ roomsLoading }),
+  conversationsLoading: true,
+  setConversationsLoading: (conversationsLoading) => set({ conversationsLoading }),
 
   // DM conversations
   conversations: [],

@@ -16,14 +16,19 @@ export function useDMs(partnerId: string | null) {
     addDMMessage,
     prependDMMessages,
     setDMTyping,
+    setConversationsLoading,
   } = useChatStore();
 
   const messages = partnerId ? (dmMessages[partnerId] ?? []) : [];
 
   // Load conversations list
   useEffect(() => {
-    dmApi.listConversations().then(setConversations).catch(console.error);
-  }, [setConversations]);
+    dmApi
+      .listConversations()
+      .then(setConversations)
+      .catch(console.error)
+      .finally(() => setConversationsLoading(false));
+  }, [setConversations, setConversationsLoading]);
 
   // Load DM history when partner changes
   useEffect(() => {

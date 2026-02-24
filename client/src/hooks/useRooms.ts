@@ -3,7 +3,7 @@ import * as roomsApi from '../api/roomsApi';
 import { useChatStore } from '../store/chatStore';
 
 export function useRooms() {
-  const { rooms, setRooms, addRoom, updateRoomMembership } = useChatStore();
+  const { rooms, setRooms, addRoom, updateRoomMembership, setRoomsLoading } = useChatStore();
 
   useEffect(() => {
     Promise.all([roomsApi.listRooms(), roomsApi.listMyRooms()])
@@ -15,8 +15,9 @@ export function useRooms() {
         }
         setRooms(Array.from(merged.values()));
       })
-      .catch(console.error);
-  }, [setRooms]);
+      .catch(console.error)
+      .finally(() => setRoomsLoading(false));
+  }, [setRooms, setRoomsLoading]);
 
   const joinRoom = async (roomId: string) => {
     await roomsApi.joinRoom(roomId);
