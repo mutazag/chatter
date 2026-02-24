@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -20,6 +21,18 @@ model User {
   messages        Message[]
   sentDMs         DirectMessage[]  @relation("DMSender")
   receivedDMs     DirectMessage[]  @relation("DMReceiver")
+  uploads         Image[]
+}
+
+model Image {
+  id           String   @id @default(cuid())
+  data         Bytes
+  mimeType     String
+  size         Int
+  createdAt    DateTime @default(now())
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
 }
 
 model Room {

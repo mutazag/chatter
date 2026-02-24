@@ -13,7 +13,9 @@
       "Bash(grep:*)",
       "Bash(head:*)",
       "Bash(cd C:/git/local/chatter/server && npx prisma migrate dev --name init 2>&1)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(cd C:/git/local/chatter/server && npx prisma migrate dev --name add_image_table 2>&1)",
+      "Bash(cd C:/git/local/chatter/server && npx prisma db push 2>&1)"
     ]
   }
 }

@@ -7,6 +7,10 @@ function isRoomMessage(m: AnyMessage): m is Message {
   return 'roomId' in m;
 }
 
+function isImageUrl(content: string): boolean {
+  return content.startsWith('/api/images/');
+}
+
 interface MessageBubbleProps {
   message: AnyMessage;
   currentUserId: string;
@@ -26,7 +30,16 @@ export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
       <div className="message-content">
         {!isOwn && <span className="message-author">{author.username}</span>}
         <div className="message-bubble">
-          <span className="message-text">{message.content}</span>
+          {isImageUrl(message.content) ? (
+            <img
+              className="msg-image"
+              src={message.content}
+              alt="image"
+              onClick={() => window.open(message.content, '_blank')}
+            />
+          ) : (
+            <span className="message-text">{message.content}</span>
+          )}
           <span className="message-time">{time}</span>
         </div>
       </div>

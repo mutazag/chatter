@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
 import dmRoutes from './routes/dmRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import { uploadRouter, imageRouter } from './routes/uploadRoutes.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 
 export function createApp() {
@@ -29,6 +30,8 @@ export function createApp() {
   app.use(cookieParser());
 
   // Routes
+  app.use('/api/upload', uploadRouter);
+  app.use('/api/images', imageRouter);
   app.use('/api/auth', authRoutes);
   app.use('/api/rooms', roomRoutes);
   app.use('/api/dms', dmRoutes);
