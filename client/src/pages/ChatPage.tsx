@@ -20,8 +20,12 @@ export function ChatPage() {
 
     if (activeView.type === 'room') {
       const room = rooms.find((r) => r.id === activeView.roomId);
-      if (!room) return null;
-      return <ChatWindow roomId={room.id} roomName={room.name} />;
+      return (
+        <ChatWindow
+          roomId={activeView.roomId}
+          roomName={room?.name ?? activeView.roomId}
+        />
+      );
     }
 
     if (activeView.type === 'dm') {

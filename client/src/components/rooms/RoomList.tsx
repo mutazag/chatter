@@ -23,6 +23,7 @@ export function RoomList({ onBrowse }: RoomListProps) {
       {myRooms.map((room) => (
         <button
           key={room.id}
+          type="button"
           className={`room-item ${activeView?.type === 'room' && activeView.roomId === room.id ? 'active' : ''}`}
           onClick={() => setActiveView({ type: 'room', roomId: room.id })}
         >

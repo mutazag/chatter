@@ -7,6 +7,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/', roomController.listRooms);
+router.get('/mine', roomController.listMyRooms);
 router.post('/', roomController.createRoom);
 router.post('/:id/join', roomController.joinRoom);
 router.delete('/:id/leave', roomController.leaveRoom);

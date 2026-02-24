@@ -22,6 +22,25 @@ export async function listPublicRooms(userId: string) {
   }));
 }
 
+export async function listUserRooms(userId: string) {
+  const rooms = await prisma.room.findMany({
+    where: { memberships: { some: { userId } } },
+    include: {
+      _count: { select: { memberships: true } },
+    },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  return rooms.map((r) => ({
+    id: r.id,
+    name: r.name,
+    description: r.description,
+    isPrivate: r.isPrivate,
+    memberCount: r._count.memberships,
+    isMember: true,
+  }));
+}
+
 export async function createRoom(
   name: string,
   description: string | undefined,

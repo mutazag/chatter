@@ -7,6 +7,11 @@ export async function listRooms(req: Request, res: Response): Promise<void> {
   res.json({ rooms });
 }
 
+export async function listMyRooms(req: Request, res: Response): Promise<void> {
+  const rooms = await roomService.listUserRooms(req.user!.id);
+  res.json({ rooms });
+}
+
 export async function createRoom(req: Request, res: Response): Promise<void> {
   const { name, description, isPrivate } = req.body as {
     name: string;

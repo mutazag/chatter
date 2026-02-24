@@ -15,7 +15,8 @@ interface ChatWindowProps {
 export function ChatWindow({ roomId, roomName }: ChatWindowProps) {
   const { user } = useAuth();
   const { messages, loadMore, sendMessage, sendTyping } = useMessages(roomId);
-  const roomTyping = useChatStore((s) => s.roomTyping[roomId] ?? []);
+  const roomTyping = useChatStore((s) => s.roomTyping[roomId]);
+  const typingUsers = roomTyping ?? [];
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +48,7 @@ export function ChatWindow({ roomId, roomName }: ChatWindowProps) {
         ))}
         <div ref={bottomRef} />
       </div>
-      <TypingIndicator usernames={roomTyping.map((u) => u.username)} />
+      <TypingIndicator usernames={typingUsers.map((u) => u.username)} />
       <div className="chat-input-area">
         <MessageInput onSend={sendMessage} onTyping={sendTyping} placeholder={`Message #${roomName}`} />
       </div>

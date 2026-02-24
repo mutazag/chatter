@@ -8,6 +8,11 @@ export async function listRooms(): Promise<Room[]> {
   return data.rooms;
 }
 
+export async function listMyRooms(): Promise<Room[]> {
+  const { data } = await api.get<{ rooms: Room[] }>('/rooms/mine');
+  return data.rooms;
+}
+
 export async function createRoom(
   name: string,
   description?: string,

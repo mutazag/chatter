@@ -6,7 +6,16 @@ export function useRooms() {
   const { rooms, setRooms, addRoom, updateRoomMembership } = useChatStore();
 
   useEffect(() => {
-    roomsApi.listRooms().then(setRooms).catch(console.error);
+    Promise.all([roomsApi.listRooms(), roomsApi.listMyRooms()])
+      .then(([publicRooms, myRooms]) => {
+        const merged = new Map<string, typeof publicRooms[number]>();
+        for (const room of publicRooms) merged.set(room.id, room);
+        for (const room of myRooms) {
+          merged.set(room.id, { ...room, isMember: true });
+        }
+        setRooms(Array.from(merged.values()));
+      })
+      .catch(console.error);
   }, [setRooms]);
 
   const joinRoom = async (roomId: string) => {
