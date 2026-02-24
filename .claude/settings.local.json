@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(cd C:/git/local/chatter && npx tsc --noEmit --project server/tsconfig.json 2>&1)",
+      "Bash(cd C:/git/local/chatter && npx tsc --noEmit --project client/tsconfig.app.json 2>&1)",
+      "Bash(cd C:/git/local/chatter/server && npx prisma generate 2>&1)",
+      "Bash(echo SERVER OK:*)",
+      "Bash(echo CLIENT OK:*)",
+      "Bash(cd C:/git/local/chatter && npm run dev 2>&1)",
+      "Bash(echo no postgres service found:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(cd C:/git/local/chatter/server && npx prisma migrate dev --name init 2>&1)",
+      "Bash(test:*)"
+    ]
+  }
+}

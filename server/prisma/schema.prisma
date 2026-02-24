@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  avatarUrl String?
+  createdAt DateTime @default(now())
+
+  createdRooms    Room[]           @relation("RoomCreator")
+  memberships     RoomMembership[]
+  messages        Message[]
+  sentDMs         DirectMessage[]  @relation("DMSender")
+  receivedDMs     DirectMessage[]  @relation("DMReceiver")
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  creatorId String
+  creator   User   @relation("RoomCreator", fields: [creatorId], references: [id])
+
+  memberships RoomMembership[]
+  messages    Message[]
+}
+
+model RoomMembership {
+  userId   String
+  roomId   String
+  joinedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roomId])
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  content   String
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+}
+
+model DirectMessage {
+  id         String    @id @default(cuid())
+  content    String
+  createdAt  DateTime  @default(now())
+  readAt     DateTime?
+
+  senderId String
+  sender   User   @relation("DMSender", fields: [senderId], references: [id])
+
+  receiverId String
+  receiver   User   @relation("DMReceiver", fields: [receiverId], references: [id])
+
+  @@index([senderId, receiverId, createdAt])
+  @@index([receiverId, senderId, createdAt])
+}
