@@ -71,45 +71,54 @@ graph TB
 
 ### REST (HTTP)
 
-```
-Browser
-  │
-  ├─ axios (withCredentials: true, /api base URL)
-  │
-Vite dev proxy  ──►  Express app
-                          │
-                     authMiddleware  (JWT cookie → req.user)
-                          │
-                       Router
-                          │
-                      Controller  (validates input, calls service)
-                          │
-                       Service  (business logic, Prisma calls)
-                          │
-                       Prisma  (SQL → PostgreSQL)
+```mermaid
+graph TD
+    Browser["Browser"]
+    Axios["axios<br/>(withCredentials: true, /api base URL)"]
+    ViteProxy["Vite Dev Proxy"]
+    Express["Express App"]
+    AuthMW["authMiddleware<br/>(JWT cookie → req.user)"]
+    Router["Router"]
+    Controller["Controller<br/>(validates input, calls service)"]
+    Service["Service<br/>(business logic, Prisma calls)"]
+    Prisma["Prisma<br/>(SQL → PostgreSQL)"]
+    
+    Browser --> Axios
+    Axios --> ViteProxy
+    ViteProxy --> Express
+    Express --> AuthMW
+    AuthMW --> Router
+    Router --> Controller
+    Controller --> Service
+    Service --> Prisma
 ```
 
 ### Real-time (Socket.IO)
 
-```
-Browser
-  │
-  └─ socket.io-client (credentials: true)
-        │ WS upgrade via Vite proxy
-        │
-  Socket.IO server
-        │
-   socketAuth  (parses cookie, verifies JWT, attaches socket.data.user)
-        │
-   Event handlers
-        │
-    roomHandlers / dmHandlers
-        │
-    Service layer  (persist to DB)
-        │
-    socket.to(room).emit(...)  (broadcast to subscribers)
-        │
-  Recipient browser ← socket.io-client
+```mermaid
+graph TD
+    Browser["Browser"]
+    SocketClient["socket.io-client<br/>(credentials: true)"]
+    ViteProxy["Vite Proxy<br/>(WebSocket Upgrade)"]
+    SocketServer["Socket.IO Server"]
+    SocketAuth["socketAuth<br/>(parses cookie, verifies JWT,<br/>attaches socket.data.user)"]
+    EventHandlers["Event Handlers"]
+    Handlers["roomHandlers / dmHandlers"]
+    ServiceLayer["Service Layer<br/>(persist to DB)"]
+    Broadcast["socket.to(room).emit(...)<br/>(broadcast to subscribers)"]
+    Recipient["Recipient Browser"]
+    RecipientClient["socket.io-client"]
+    
+    Browser --> SocketClient
+    SocketClient --> ViteProxy
+    ViteProxy --> SocketServer
+    SocketServer --> SocketAuth
+    SocketAuth --> EventHandlers
+    EventHandlers --> Handlers
+    Handlers --> ServiceLayer
+    ServiceLayer --> Broadcast
+    Broadcast --> RecipientClient
+    RecipientClient --> Recipient
 ```
 
 ---
