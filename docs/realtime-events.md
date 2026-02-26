@@ -245,7 +245,7 @@ sequenceDiagram
     participant User
     participant MI as MessageInput
     participant ST as sendTyping()
-    participant Socket as Socket.IO<br/>Client
+    participant Socket as Socket.IO Client
     participant Server
     participant OC as Other Clients
     participant Z as Zustand

@@ -67,7 +67,7 @@ Each time the user navigates to a room, the `useMessages` hook re-runs (new `roo
 sequenceDiagram
     participant CA as Client A
     participant S as Server
-    participant CS as All Subscribers<br/>(including Client A)
+    participant CS as All Subscribers (including Client A)
 
     CA->>S: room:message<br/>{ roomId, content }
     Note over S: verify membership
