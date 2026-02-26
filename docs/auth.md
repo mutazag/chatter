@@ -26,7 +26,11 @@ sequenceDiagram
 
     Note over C,S: Session Restoration (every page load)
     C->>S: GET /api/auth/me (Cookie sent automatically by browser)
-    Note over S: requireAuth middleware:<br/>1. parse token cookie<br/>2. jwt.verify(token)<br/>3. getUserById(payload.userId)<br/>4. req.user = user
+    Note over S: requireAuth middleware
+    Note over S: 1. parse token cookie
+    Note over S: 2. jwt.verify(token)
+    Note over S: 3. getUserById(payload.userId)
+    Note over S: 4. req.user = user
     S-->>C: {id, username, email, avatarUrl}
 
     Note over C,S: Logout
