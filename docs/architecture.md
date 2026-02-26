@@ -2,55 +2,40 @@
 
 ## System Topology
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Browser (Client)                        │
-│                                                                 │
-│  React 19 SPA (Vite)                                            │
-│  ┌───────────┐  ┌───────────┐  ┌────────────┐  ┌────────────┐  │
-│  │   Pages   │  │Components │  │   Hooks    │  │   Store    │  │
-│  │ LoginPage │  │ChatWindow │  │useMessages │  │ chatStore  │  │
-│  │ ChatPage  │  │DMWindow   │  │useDMs      │  │ (Zustand)  │  │
-│  │ ...       │  │MessageBub │  │useRooms    │  │            │  │
-│  └───────────┘  └───────────┘  └────────────┘  └────────────┘  │
-│       │                │              │                         │
-│  ┌────▼────────────────▼──────────────▼──────────────────────┐  │
-│  │              API Layer  +  Socket.IO Client                │  │
-│  │  authApi / roomsApi / dmApi / uploadApi   socket.io-client │  │
-│  └───────────────────────────┬──────────────────┬────────────┘  │
-└──────────────────────────────┼──────────────────┼───────────────┘
-                    HTTP/HTTPS │                  │ WebSocket
-                    /api/*     │                  │ /socket.io
-┌──────────────────────────────┼──────────────────┼───────────────┐
-│                         Server (Node.js)         │               │
-│                               │                  │               │
-│  ┌─────────────────────────┐  │  ┌───────────────▼───────────┐  │
-│  │      Express App         ◄─┘  │     Socket.IO Server      │  │
-│  │  helmet / cors / cookie  │    │  socketAuth middleware     │  │
-│  │  ┌──────────────────┐   │    │  ┌─────────────────────┐  │  │
-│  │  │     Routes       │   │    │  │   roomHandlers       │  │  │
-│  │  │  /api/auth       │   │    │  │   dmHandlers         │  │  │
-│  │  │  /api/rooms      │   │    │  └─────────────────────┘  │  │
-│  │  │  /api/dms        │   │    └───────────────────────────┘  │
-│  │  │  /api/users      │   │                │                   │
-│  │  │  /api/upload     │   │    ┌───────────▼───────────────┐  │
-│  │  │  /api/images     │   │    │        Services            │  │
-│  │  └──────────────────┘   │    │  authService / roomService │  │
-│  │  ┌──────────────────┐   │    │  messageService / dmService│  │
-│  │  │   Controllers    ├───┼────►                           │  │
-│  │  └──────────────────┘   │    └───────────────────────────┘  │
-│  └─────────────────────────┘                │                   │
-│                                  ┌───────────▼───────────────┐  │
-│                                  │    Prisma ORM Client      │  │
-│                                  └───────────────────────────┘  │
-└──────────────────────────────────────────────┬────────────────────┘
-                                               │
-                                    ┌──────────▼──────────┐
-                                    │  PostgreSQL (Neon)  │
-                                    │  User / Room /      │
-                                    │  Message / DM /     │
-                                    │  Image / Membership │
-                                    └─────────────────────┘
+```mermaid
+graph TB
+    subgraph Client["Browser — React 19 SPA (Vite)"]
+        direction TB
+        P["Pages<br/>LoginPage · ChatPage"]
+        C["Components<br/>ChatWindow · DMWindow · MessageBubble"]
+        H["Hooks<br/>useMessages · useDMs · useRooms"]
+        Z["Zustand Store<br/>chatStore"]
+        AL["API Layer + socket.io-client<br/>authApi · roomsApi · dmApi · uploadApi"]
+        P & C & H --> AL
+    end
+
+    subgraph NodeServer["Node.js Server"]
+        direction TB
+        subgraph ExpressApp["Express App (helmet · cors · cookie)"]
+            Routes["Routes<br/>/api/auth · /api/rooms · /api/dms<br/>/api/users · /api/upload · /api/images"]
+            Ctrl["Controllers"]
+            Routes --> Ctrl
+        end
+        subgraph SocketSrv["Socket.IO Server (socketAuth)"]
+            SH["Handlers<br/>roomHandlers · dmHandlers"]
+        end
+        Svc["Services<br/>authService · roomService<br/>messageService · dmService"]
+        ORM["Prisma ORM"]
+        Ctrl --> Svc
+        SH --> Svc
+        Svc --> ORM
+    end
+
+    DB[("PostgreSQL — Neon<br/>User · Room · RoomMembership<br/>Message · DirectMessage · Image")]
+
+    AL -->|"HTTP /api/*"| ExpressApp
+    AL -->|"WebSocket /socket.io"| SocketSrv
+    ORM --> DB
 ```
 
 ---
