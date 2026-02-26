@@ -70,11 +70,12 @@ GIVEN any user sends a message:
 - Every connected client subscribed to that room or DM conversation SHALL receive the message via a socket event within the network round-trip time
 - The message SHALL be appended to the message list in the correct position (chronologically last)
 
-### FR-MSG-010 — Auto-scroll
+### FR-MSG-010 — Auto-scroll on New Messages
 
-GIVEN a new message arrives and the user is at (or near) the bottom of the message list:
-- The view SHALL automatically scroll to the new message using smooth scrolling
+GIVEN a new real-time message arrives (sent or received):
+- The view SHALL automatically scroll to the new message using **smooth** scrolling
 - This behaviour applies to both sent messages (own) and received messages (others')
+- This is distinct from initial history load, which uses instant scroll (see FR-MSG-017)
 
 ### FR-MSG-011 — No Auto-scroll While Reading History
 
@@ -126,7 +127,7 @@ Newlines in message content SHALL be preserved and rendered as visual line break
 GIVEN a user opens a room or DM conversation for the first time in a session:
 - The system SHALL fetch the **50 most recent messages** from the server
 - While loading, a **MessageSkeleton** (alternating shimmer bubbles) SHALL be displayed
-- Once loaded, the scroll position SHALL be at the **bottom** (most recent message visible)
+- Once loaded, the scroll position SHALL **instantly** jump to the bottom (most recent message visible) — no smooth animation on initial load
 
 ### FR-MSG-018 — Cached History
 

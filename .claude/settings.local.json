@@ -28,7 +28,8 @@
       "Bash(python3:*)",
       "Bash(node:*)",
       "mcp__playwright__browser_file_upload",
-      "mcp__playwright__browser_console_messages"
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_take_screenshot"
     ]
   }
 }

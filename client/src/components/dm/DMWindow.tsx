@@ -22,9 +22,22 @@ export function DMWindow({ partnerId, partnerUsername, partnerAvatarUrl }: DMWin
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastMessageIdRef = useRef<string | null>(null);
+  const initialScrollDone = useRef(false);
 
+  // Scroll to bottom instantly after initial load completes (skeleton → messages).
+  // Fires when isLoading transitions to false so messages are already in the DOM.
   useEffect(() => {
-    if (messages.length === 0) return;
+    if (isLoading || initialScrollDone.current || messages.length === 0) return;
+    initialScrollDone.current = true;
+    lastMessageIdRef.current = messages[messages.length - 1].id;
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Smooth scroll when a new real-time message is appended.
+  useEffect(() => {
+    if (!initialScrollDone.current || messages.length === 0) return;
     const lastId = messages[messages.length - 1].id;
     if (lastId !== lastMessageIdRef.current) {
       lastMessageIdRef.current = lastId;

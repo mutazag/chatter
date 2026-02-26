@@ -53,7 +53,8 @@ GIVEN a user opens a DM with someone they have never messaged:
 
 GIVEN a user opens a DM with a previous conversation:
 - The system SHALL show a **message skeleton** while history is being fetched
-- Once loaded, the most recent messages SHALL be visible with the scroll position at the bottom
+- Once loaded, the scroll position SHALL **instantly** jump to the bottom (most recent message visible) — no smooth animation on initial load
+- New messages arriving in real-time SHALL scroll to the bottom with a **smooth** animation
 
 ### FR-DM-008 — Message History Caching
 
