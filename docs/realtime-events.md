@@ -240,32 +240,31 @@ Socket events that encounter errors (e.g. sending to a room you're not a member 
 
 ## Typing Indicator Flow (End-to-End)
 
-```
-User types in MessageInput
-      │
-      │  onChange fires
-      │
-  sendTyping(true)
-      │
-  socket.emit('room:typing', { roomId, isTyping: true })
-      │
-  [2 second debounce timer resets]
-      │
-  Server broadcasts to room:<roomId>
-      │
-  Other clients receive 'room:typing'
-      │
-  setRoomTyping(rid, userId, username, true)  →  Zustand
-      │
-  TypingIndicator re-renders: "Alice is typing..."
-      │
-  [2 seconds of no typing]
-      │
-  sendTyping(false)
-      │
-  socket.emit('room:typing', { roomId, isTyping: false })
-      │
-  setRoomTyping(rid, userId, username, false)  →  Zustand
-      │
-  TypingIndicator: empty (hidden)
+```mermaid
+sequenceDiagram
+    participant User
+    participant MI as MessageInput
+    participant ST as sendTyping()
+    participant Socket as Socket.IO<br/>Client
+    participant Server
+    participant OC as Other Clients
+    participant Z as Zustand
+    participant TI as TypingIndicator
+
+    User->>MI: types
+    MI->>ST: onChange fires
+    ST->>Socket: emit('room:typing',<br/>{ roomId, isTyping: true })
+    Note over ST: 2 second debounce<br/>timer resets
+    Socket->>Server: room:typing event
+    Server->>OC: broadcast to room:&lt;roomId&gt;
+    OC->>Z: setRoomTyping(rid, userId,<br/>username, true)
+    Z->>TI: re-render<br/>"Alice is typing..."
+
+    Note over User,TI: [2 seconds of no typing]
+
+    ST->>Socket: emit('room:typing',<br/>{ roomId, isTyping: false })
+    Socket->>Server: room:typing event
+    Server->>OC: broadcast to room:&lt;roomId&gt;
+    OC->>Z: setRoomTyping(rid, userId,<br/>username, false)
+    Z->>TI: empty (hidden)
 ```

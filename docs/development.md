@@ -144,24 +144,45 @@ DIRECT_URL="postgresql://postgres:password@localhost:5432/chatter"
 
 ## Project Structure Reference
 
-```
-chatter/
-├── client/src/
-│   ├── api/          HTTP wrappers (Axios + fetch)
-│   ├── components/   UI components grouped by domain
-│   ├── context/      AuthContext, SocketContext
-│   ├── hooks/        Custom React hooks
-│   ├── pages/        Route-level page components
-│   ├── store/        Zustand global state
-│   └── types/        Shared TypeScript interfaces
-└── server/src/
-    ├── config/       Environment validation (Zod)
-    ├── controllers/  HTTP request handlers
-    ├── middleware/   Auth guard, rate limiter, error handler
-    ├── routes/       Express router definitions
-    ├── services/     Business logic and DB access
-    ├── socket/       Socket.IO auth + event handlers
-    └── types/        Server-side TypeScript interfaces
+```mermaid
+graph TD
+    Root["chatter/"]
+    ClientSrc["client/src/"]
+    Api["api/<br/>(HTTP wrappers: Axios + fetch)"]
+    Components["components/<br/>(UI components grouped by domain)"]
+    Context["context/<br/>(AuthContext, SocketContext)"]
+    Hooks["hooks/<br/>(Custom React hooks)"]
+    Pages["pages/<br/>(Route-level page components)"]
+    Store["store/<br/>(Zustand global state)"]
+    ClientTypes["types/<br/>(Shared TypeScript interfaces)"]
+
+    ServerSrc["server/src/"]
+    Config["config/<br/>(Environment validation: Zod)"]
+    Controllers["controllers/<br/>(HTTP request handlers)"]
+    Middleware["middleware/<br/>(Auth guard, rate limiter, error handler)"]
+    Routes["routes/<br/>(Express router definitions)"]
+    Services["services/<br/>(Business logic and DB access)"]
+    Socket["socket/<br/>(Socket.IO auth + event handlers)"]
+    ServerTypes["types/<br/>(Server-side TypeScript interfaces)"]
+
+    Root --> ClientSrc
+    Root --> ServerSrc
+
+    ClientSrc --> Api
+    ClientSrc --> Components
+    ClientSrc --> Context
+    ClientSrc --> Hooks
+    ClientSrc --> Pages
+    ClientSrc --> Store
+    ClientSrc --> ClientTypes
+
+    ServerSrc --> Config
+    ServerSrc --> Controllers
+    ServerSrc --> Middleware
+    ServerSrc --> Routes
+    ServerSrc --> Services
+    ServerSrc --> Socket
+    ServerSrc --> ServerTypes
 ```
 
 ---

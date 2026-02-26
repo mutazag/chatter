@@ -12,67 +12,67 @@ The client is a **React 19 Single-Page Application** built with Vite. It uses Re
 graph TD
     App["App"]
     AuthProvider["AuthProvider<br/>(React Context)"]
-    
+
     Login["/login → LoginPage → LoginForm"]
     Register["/register → RegisterPage → RegisterForm"]
     Root["/  → redirect /chat"]
     NotFound["* → NotFoundPage"]
     Chat["/chat (RequireAuth guard)"]
-    
+
     SocketProvider["SocketProvider<br/>(React Context)"]
     ChatPage["ChatPage"]
     MainLayout["MainLayout"]
-    
+
     Header["Header"]
     Avatar["Avatar<br/>(current user)"]
-    
+
     Sidebar["Sidebar"]
     RoomList["RoomList"]
     RoomListContent["SidebarSkeleton | room-item buttons"]
     DMList["DMList"]
     DMListContent["SidebarSkeleton | dm-item buttons"]
     Modals["modals: RoomBrowser,<br/>CreateRoomModal, user search"]
-    
+
     MainContent["main content area"]
     Welcome["(welcome screen)"]
     ChatWindow["ChatWindow<br/>[when room is active]"]
     ChatMessages["MessageSkeleton | MessageBubble[]"]
     ChatTyping["TypingIndicator"]
     ChatInput["MessageInput"]
-    
+
     DMWindow["DMWindow<br/>[when DM is active]"]
     DMMessages["MessageSkeleton | MessageBubble[]"]
     DMTyping["TypingIndicator"]
     DMInput["MessageInput"]
-    
+
     App --> AuthProvider
     AuthProvider --> Login
     AuthProvider --> Register
     AuthProvider --> Root
     AuthProvider --> NotFound
     AuthProvider --> Chat
-    
+
     Chat --> SocketProvider
     SocketProvider --> ChatPage
     ChatPage --> MainLayout
-    
+
     MainLayout --> Header
     Header --> Avatar
-    
+
     MainLayout --> Sidebar
     Sidebar --> RoomList
     RoomList --> RoomListContent
     Sidebar --> DMList
     DMList --> DMListContent
     Sidebar --> Modals
-    
+
     MainLayout --> MainContent
     MainContent --> Welcome
     MainContent --> ChatWindow
     ChatWindow --> ChatMessages
     ChatWindow --> ChatTyping
     ChatWindow --> ChatInput
-    
+
     MainContent --> DMWindow
     DMWindow --> DMMessages
     DMWindow --> DMTyping
@@ -235,7 +235,7 @@ graph TD
     Text["text?"]
     MessageImage["MessageImage<br/>(shimmer + &lt;img&gt;)"]
     Span["&lt;span&gt;<br/>message-text"]
-    
+
     Content --> Parse
     Parse --> Split
     Split --> ImageUrl

@@ -12,15 +12,24 @@ This spec covers the visual design system, layout structure, navigation model, l
 
 The application SHALL use a fixed three-zone layout that fills the full viewport height:
 
-```
-┌─────────────────────────────────────────────┐
-│                  Header (52px)               │
-├──────────────┬──────────────────────────────┤
-│              │                              │
-│   Sidebar    │        Main Content          │
-│   (240px)    │         (flex: 1)            │
-│              │                              │
-└──────────────┴──────────────────────────────┘
+```mermaid
+graph TD
+    subgraph FullViewport["Full Viewport Height"]
+        direction TB
+        Header["Header<br/>(52px fixed height)"]
+
+        subgraph Row[" "]
+            direction LR
+            Sidebar["Sidebar<br/>(240px fixed width)"]
+            MainContent["Main Content<br/>(flex: 1 - fills remaining space)"]
+        end
+
+        Header ~~~ Row
+    end
+
+    style Header fill:#f0f0f0,stroke:#333
+    style Sidebar fill:#f9f9f9,stroke:#333
+    style MainContent fill:#ffffff,stroke:#333
 ```
 
 - The header SHALL have a fixed height of `52px` (CSS variable `--header-h`)

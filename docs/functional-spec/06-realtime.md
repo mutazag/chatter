@@ -68,7 +68,7 @@ sequenceDiagram
     participant CA as Client A
     participant S as Server
     participant CS as All Subscribers<br/>(including Client A)
-    
+
     CA->>S: room:message<br/>{ roomId, content }
     Note over S: verify membership
     Note over S: persist to DB<br/>(messageService.createMessage)
@@ -87,7 +87,7 @@ sequenceDiagram
     participant CA as Client A (sender)
     participant S as Server
     participant CB as Client B (receiver)
-    
+
     CA->>S: dm:send<br/>{ receiverId, content }
     Note over S: validate receiver exists
     Note over S: persist to DB<br/>(dmService.sendDM)
@@ -118,7 +118,7 @@ sequenceDiagram
     participant CA as Client A
     participant S as Server
     participant CS as All Other Subscribers
-    
+
     CA->>S: room:typing<br/>{ roomId, isTyping }
     S->>CS: socket.to('room:&lt;roomId&gt;')<br/>.emit('room:typing',<br/>{ roomId, userId, username, isTyping })
     Note over CS: update roomTyping[roomId]<br/>in Zustand
@@ -133,7 +133,7 @@ sequenceDiagram
     participant CA as Client A (sender)
     participant S as Server
     participant CB as Client B (receiver)
-    
+
     CA->>S: dm:typing<br/>{ receiverId, isTyping }
     S->>CB: io.to('user:&lt;receiverId&gt;')<br/>.emit('dm:typing',<br/>{ senderId, isTyping })
     Note over CB: update dmTyping[senderId]<br/>in Zustand
