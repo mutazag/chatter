@@ -2,20 +2,16 @@
 
 ## Architecture for Production
 
-```
-Internet
-    │
-    ▼
-[Reverse Proxy: nginx / Caddy]
-    │  TLS termination
-    │  Static file serving (client/dist)
-    │  Proxy /api/* and /socket.io/* → Node server
-    │
-    ▼
-[Node.js Server: port 3000]
-    │
-    ▼
-[PostgreSQL: Neon cloud / managed DB]
+```mermaid
+graph TD
+    Internet["Internet"]
+    Proxy["Reverse Proxy — nginx / Caddy<br/>────────────────────────────<br/>TLS termination (HTTPS :443)<br/>Serves client/dist static files<br/>Proxies /api/* → Node server<br/>Proxies /socket.io/* → Node server<br/>(with WebSocket upgrade headers)"]
+    Node["Node.js Server — port 3000<br/>────────────────────────────<br/>Express REST API<br/>Socket.IO WebSocket Server"]
+    DB[("PostgreSQL<br/>Neon cloud / managed DB<br/>────────────────────────────<br/>Application data<br/>Image blobs (bytea)")]
+
+    Internet -->|"HTTPS :443"| Proxy
+    Proxy -->|"HTTP :3000"| Node
+    Node -->|"SQL over TLS"| DB
 ```
 
 The client is a static SPA (`index.html` + JS bundles). In production it can be served directly from the Node server, a CDN, or a reverse proxy. All API and WebSocket traffic goes to the Node server.

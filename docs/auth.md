@@ -2,28 +2,36 @@
 
 ## Authentication Flow
 
-```
-┌────────┐      POST /api/auth/login        ┌────────────────┐
-│ Client │  ──────────────────────────────► │    Server      │
-│        │  { email, password }             │                │
-│        │                                  │ 1. bcrypt.compare(password, hash)
-│        │                                  │ 2. jwt.sign({ userId, username })
-│        │  ◄──────────────────────────────  │                │
-│        │  Set-Cookie: token=<jwt>         │                │
-│        │  { id, username, email }         └────────────────┘
-│        │
-│        │   (subsequent requests)
-│        │
-│        │  GET /api/auth/me  + Cookie: token=<jwt>
-│        │  ──────────────────────────────────────►
-│        │                                  requireAuth middleware:
-│        │                                  1. Parse token cookie
-│        │                                  2. jwt.verify(token)
-│        │                                  3. getUserById(payload.userId)
-│        │                                  4. req.user = user
-│        │  ◄──────────────────────────────
-│        │  { id, username, email, avatarUrl }
-└────────┘
+```mermaid
+sequenceDiagram
+    participant C as Client (Browser)
+    participant S as Server
+
+    Note over C,S: Registration
+    C->>S: POST /api/auth/register {username, email, password}
+    S->>S: check email + username uniqueness
+    S->>S: bcrypt.hash(password, 12 rounds)
+    S->>S: INSERT User record
+    S->>S: jwt.sign({userId, username, email})
+    S-->>C: Set-Cookie: token=JWT (HttpOnly, SameSite=Strict)
+    S-->>C: {id, username, email}
+
+    Note over C,S: Login
+    C->>S: POST /api/auth/login {email, password}
+    S->>S: getUserByEmail(email)
+    S->>S: bcrypt.compare(password, hash)
+    S->>S: jwt.sign({userId, username, email})
+    S-->>C: Set-Cookie: token=JWT (HttpOnly, SameSite=Strict)
+    S-->>C: {id, username, email}
+
+    Note over C,S: Session Restoration (every page load)
+    C->>S: GET /api/auth/me (Cookie sent automatically by browser)
+    Note over S: requireAuth middleware:<br/>1. parse token cookie<br/>2. jwt.verify(token)<br/>3. getUserById(payload.userId)<br/>4. req.user = user
+    S-->>C: {id, username, email, avatarUrl}
+
+    Note over C,S: Logout
+    C->>S: POST /api/auth/logout
+    S-->>C: Set-Cookie: token=; maxAge=0 (cleared)
 ```
 
 ### Registration

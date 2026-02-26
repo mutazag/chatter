@@ -2,53 +2,63 @@
 
 ## Entity-Relationship Diagram
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                                                                      │
-│   ┌─────────────┐          ┌─────────────────┐                      │
-│   │    User     │          │  RoomMembership  │                      │
-│   │─────────────│          │─────────────────│                      │
-│   │ id (cuid)   │◄────────►│ userId (FK)     │                      │
-│   │ username    │  member  │ roomId (FK)     │◄──────┐              │
-│   │ email       │          │ joinedAt        │       │              │
-│   │ password    │          └─────────────────┘       │              │
-│   │ avatarUrl?  │                                  ┌──▼──────────┐  │
-│   │ createdAt   │                                  │    Room     │  │
-│   │ updatedAt   │          ┌─────────────┐         │─────────────│  │
-│   └──────┬──────┘          │   Message   │         │ id (cuid)   │  │
-│          │                 │─────────────│         │ name        │  │
-│          │  author         │ id (cuid)   │         │ description?│  │
-│          ├────────────────►│ content     │         │ isPrivate   │  │
-│          │                 │ authorId FK │         │ creatorId FK│  │
-│          │  creator        │ roomId FK   ├────────►│ createdAt   │  │
-│          ├────────────────►│ createdAt   │         │ updatedAt   │  │
-│          │                 └─────────────┘         └─────────────┘  │
-│          │                                                           │
-│          │  sender/receiver                                          │
-│          │         ┌────────────────┐                               │
-│          ├────────►│ DirectMessage  │                               │
-│          │         │────────────────│                               │
-│          │         │ id (cuid)      │                               │
-│          │         │ content        │                               │
-│          │         │ senderId FK    │                               │
-│          │         │ receiverId FK  │                               │
-│          │         │ createdAt      │                               │
-│          │         │ readAt?        │                               │
-│          │         └────────────────┘                               │
-│          │                                                           │
-│          │  uploadedBy                                               │
-│          │         ┌────────────────┐                               │
-│          └────────►│    Image       │                               │
-│                    │────────────────│                               │
-│                    │ id (cuid)      │                               │
-│                    │ data (Bytes)   │                               │
-│                    │ mimeType       │                               │
-│                    │ size (Int)     │                               │
-│                    │ uploadedById FK│                               │
-│                    │ createdAt      │                               │
-│                    └────────────────┘                               │
-│                                                                      │
-└──────────────────────────────────────────────────────────────────────┘
+```mermaid
+erDiagram
+    User {
+        String id PK
+        String username UK
+        String email UK
+        String password
+        String avatarUrl
+        DateTime createdAt
+        DateTime updatedAt
+    }
+    Room {
+        String id PK
+        String name UK
+        String description
+        Boolean isPrivate
+        String creatorId FK
+        DateTime createdAt
+        DateTime updatedAt
+    }
+    RoomMembership {
+        String userId FK "composite PK"
+        String roomId FK "composite PK"
+        DateTime joinedAt
+    }
+    Message {
+        String id PK
+        String content
+        String authorId FK
+        String roomId FK
+        DateTime createdAt
+    }
+    DirectMessage {
+        String id PK
+        String content
+        String senderId FK
+        String receiverId FK
+        DateTime createdAt
+        DateTime readAt
+    }
+    Image {
+        String id PK
+        Bytes data
+        String mimeType
+        Int size
+        String uploadedById FK
+        DateTime createdAt
+    }
+
+    User ||--o{ RoomMembership : "member"
+    Room ||--o{ RoomMembership : "has"
+    User ||--o{ Message : "authors"
+    Room ||--o{ Message : "contains"
+    User ||--o{ DirectMessage : "sends"
+    User ||--o{ DirectMessage : "receives"
+    User ||--o{ Image : "uploads"
+    User ||--o{ Room : "creates"
 ```
 
 ---
