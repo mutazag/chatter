@@ -63,13 +63,17 @@ Each time the user navigates to a room, the `useMessages` hook re-runs (new `roo
 
 ### FR-RT-009 — Room Message Flow
 
-```
-Client A emits room:message { roomId, content }
-  → Server: verify membership
-  → Server: persist to DB (messageService.createMessage)
-  → Server: socket.to('room:<roomId>').emit('room:message', { message })
-  → All subscribers including Client A receive room:message
-  → Each client: addRoomMessage(roomId, message) in Zustand
+```mermaid
+sequenceDiagram
+    participant CA as Client A
+    participant S as Server
+    participant CS as All Subscribers<br/>(including Client A)
+    
+    CA->>S: room:message<br/>{ roomId, content }
+    Note over S: verify membership
+    Note over S: persist to DB<br/>(messageService.createMessage)
+    S->>CS: socket.to('room:&lt;roomId&gt;')<br/>.emit('room:message', { message })
+    Note over CS: addRoomMessage(roomId, message)<br/>in Zustand
 ```
 
 The sender receives their own message back via the broadcast. This ensures:
@@ -78,14 +82,19 @@ The sender receives their own message back via the broadcast. This ensures:
 
 ### FR-RT-010 — DM Message Flow
 
-```
-Client A emits dm:send { receiverId, content }
-  → Server: validate receiver exists
-  → Server: persist to DB (dmService.sendDM)
-  → Server: io.to('user:<senderId>').emit('dm:message', { message })
-  → Server: io.to('user:<receiverId>').emit('dm:message', { message })
-  → Both clients receive dm:message
-  → Each client: addDMMessage(partnerKey, message) in Zustand
+```mermaid
+sequenceDiagram
+    participant CA as Client A (sender)
+    participant S as Server
+    participant CB as Client B (receiver)
+    
+    CA->>S: dm:send<br/>{ receiverId, content }
+    Note over S: validate receiver exists
+    Note over S: persist to DB<br/>(dmService.sendDM)
+    S->>CA: io.to('user:&lt;senderId&gt;')<br/>.emit('dm:message', { message })
+    S->>CB: io.to('user:&lt;receiverId&gt;')<br/>.emit('dm:message', { message })
+    Note over CA: addDMMessage(partnerKey, message)<br/>in Zustand
+    Note over CB: addDMMessage(partnerKey, message)<br/>in Zustand
 ```
 
 The message is emitted to both the sender's and receiver's personal inbox rooms so both parties see it in real time.
@@ -104,24 +113,30 @@ The system does not deduplicate messages. If a socket event is received twice (e
 
 ### FR-RT-013 — Room Typing Broadcast
 
-```
-Client A emits room:typing { roomId, isTyping }
-  → Server: socket.to('room:<roomId>').emit('room:typing', {
-      roomId, userId, username, isTyping
-    })
-  → All other subscribers update roomTyping[roomId] in Zustand
+```mermaid
+sequenceDiagram
+    participant CA as Client A
+    participant S as Server
+    participant CS as All Other Subscribers
+    
+    CA->>S: room:typing<br/>{ roomId, isTyping }
+    S->>CS: socket.to('room:&lt;roomId&gt;')<br/>.emit('room:typing',<br/>{ roomId, userId, username, isTyping })
+    Note over CS: update roomTyping[roomId]<br/>in Zustand
 ```
 
 The typing event is NOT saved to the database. It is ephemeral — lost on reconnect or refresh.
 
 ### FR-RT-014 — DM Typing Broadcast
 
-```
-Client A emits dm:typing { receiverId, isTyping }
-  → Server: io.to('user:<receiverId>').emit('dm:typing', {
-      senderId, isTyping
-    })
-  → Receiver updates dmTyping[senderId] in Zustand
+```mermaid
+sequenceDiagram
+    participant CA as Client A (sender)
+    participant S as Server
+    participant CB as Client B (receiver)
+    
+    CA->>S: dm:typing<br/>{ receiverId, isTyping }
+    S->>CB: io.to('user:&lt;receiverId&gt;')<br/>.emit('dm:typing',<br/>{ senderId, isTyping })
+    Note over CB: update dmTyping[senderId]<br/>in Zustand
 ```
 
 ### FR-RT-015 — Sender Does Not See Own Typing Indicator

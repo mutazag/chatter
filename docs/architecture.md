@@ -82,7 +82,7 @@ graph TD
     Controller["Controller<br/>(validates input, calls service)"]
     Service["Service<br/>(business logic, Prisma calls)"]
     Prisma["Prisma<br/>(SQL → PostgreSQL)"]
-    
+
     Browser --> Axios
     Axios --> ViteProxy
     ViteProxy --> Express
@@ -108,7 +108,7 @@ graph TD
     Broadcast["socket.to(room).emit(...)<br/>(broadcast to subscribers)"]
     Recipient["Recipient Browser"]
     RecipientClient["socket.io-client"]
-    
+
     Browser --> SocketClient
     SocketClient --> ViteProxy
     ViteProxy --> SocketServer

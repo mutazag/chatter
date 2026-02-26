@@ -8,35 +8,75 @@ The client is a **React 19 Single-Page Application** built with Vite. It uses Re
 
 ## Component Hierarchy
 
-```
-App
-├── AuthProvider  (React Context)
-│   ├── /login       → LoginPage → LoginForm
-│   ├── /register    → RegisterPage → RegisterForm
-│   ├── /            → redirect /chat
-│   ├── *            → NotFoundPage
-│   └── /chat  (RequireAuth guard)
-│       └── SocketProvider  (React Context)
-│           └── ChatPage
-│               └── MainLayout
-│                   ├── Header
-│                   │   └── Avatar (current user)
-│                   ├── Sidebar
-│                   │   ├── RoomList
-│                   │   │   └── SidebarSkeleton | room-item buttons
-│                   │   ├── DMList
-│                   │   │   └── SidebarSkeleton | dm-item buttons
-│                   │   └── [modals: RoomBrowser, CreateRoomModal, user search]
-│                   └── main content area
-│                       ├── (welcome screen)
-│                       ├── ChatWindow  [when room is active]
-│                       │   ├── MessageSkeleton | MessageBubble[]
-│                       │   ├── TypingIndicator
-│                       │   └── MessageInput
-│                       └── DMWindow  [when DM is active]
-│                           ├── MessageSkeleton | MessageBubble[]
-│                           ├── TypingIndicator
-│                           └── MessageInput
+```mermaid
+graph TD
+    App["App"]
+    AuthProvider["AuthProvider<br/>(React Context)"]
+    
+    Login["/login → LoginPage → LoginForm"]
+    Register["/register → RegisterPage → RegisterForm"]
+    Root["/  → redirect /chat"]
+    NotFound["* → NotFoundPage"]
+    Chat["/chat (RequireAuth guard)"]
+    
+    SocketProvider["SocketProvider<br/>(React Context)"]
+    ChatPage["ChatPage"]
+    MainLayout["MainLayout"]
+    
+    Header["Header"]
+    Avatar["Avatar<br/>(current user)"]
+    
+    Sidebar["Sidebar"]
+    RoomList["RoomList"]
+    RoomListContent["SidebarSkeleton | room-item buttons"]
+    DMList["DMList"]
+    DMListContent["SidebarSkeleton | dm-item buttons"]
+    Modals["modals: RoomBrowser,<br/>CreateRoomModal, user search"]
+    
+    MainContent["main content area"]
+    Welcome["(welcome screen)"]
+    ChatWindow["ChatWindow<br/>[when room is active]"]
+    ChatMessages["MessageSkeleton | MessageBubble[]"]
+    ChatTyping["TypingIndicator"]
+    ChatInput["MessageInput"]
+    
+    DMWindow["DMWindow<br/>[when DM is active]"]
+    DMMessages["MessageSkeleton | MessageBubble[]"]
+    DMTyping["TypingIndicator"]
+    DMInput["MessageInput"]
+    
+    App --> AuthProvider
+    AuthProvider --> Login
+    AuthProvider --> Register
+    AuthProvider --> Root
+    AuthProvider --> NotFound
+    AuthProvider --> Chat
+    
+    Chat --> SocketProvider
+    SocketProvider --> ChatPage
+    ChatPage --> MainLayout
+    
+    MainLayout --> Header
+    Header --> Avatar
+    
+    MainLayout --> Sidebar
+    Sidebar --> RoomList
+    RoomList --> RoomListContent
+    Sidebar --> DMList
+    DMList --> DMListContent
+    Sidebar --> Modals
+    
+    MainLayout --> MainContent
+    MainContent --> Welcome
+    MainContent --> ChatWindow
+    ChatWindow --> ChatMessages
+    ChatWindow --> ChatTyping
+    ChatWindow --> ChatInput
+    
+    MainContent --> DMWindow
+    DMWindow --> DMMessages
+    DMWindow --> DMTyping
+    DMWindow --> DMInput
 ```
 
 ---
@@ -186,18 +226,22 @@ Skeletons mimic the shape of real content — alternating left/right bubbles, va
 
 ## Message Rendering Pipeline
 
-```
-Message.content (string)
-        │
-  parseContent()
-        │
-   ┌────┴────┐
-   │         │
-imageUrl?  text?
-   │         │
-MessageImage  <span>
-(shimmer +   message-text
- <img>)
+```mermaid
+graph TD
+    Content["Message.content (string)"]
+    Parse["parseContent()"]
+    Split{" "}
+    ImageUrl["imageUrl?"]
+    Text["text?"]
+    MessageImage["MessageImage<br/>(shimmer + &lt;img&gt;)"]
+    Span["&lt;span&gt;<br/>message-text"]
+    
+    Content --> Parse
+    Parse --> Split
+    Split --> ImageUrl
+    Split --> Text
+    ImageUrl --> MessageImage
+    Text --> Span
 ```
 
 `parseContent` handles two formats:

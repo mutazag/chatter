@@ -13,7 +13,7 @@ graph LR
     C["Client Browser<br/>ws://localhost:5173/socket.io/<br/>?EIO=4&transport=websocket"]
     V["Vite Dev Proxy"]
     S["Socket.IO Server<br/>ws://localhost:3000/socket.io/"]
-    
+
     C -->|"WebSocket Upgrade"| V
     V -->|"Proxy"| S
 ```
