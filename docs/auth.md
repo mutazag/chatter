@@ -13,7 +13,7 @@ sequenceDiagram
     S->>S: bcrypt.hash(password, 12 rounds)
     S->>S: INSERT User record
     S->>S: jwt.sign({userId, username, email})
-    S-->>C: "Set-Cookie: token=JWT (HttpOnly, SameSite=Strict)"
+    S-->>C: Set-Cookie: token=JWT (HttpOnly, SameSite=Strict)
     S-->>C: {id, username, email}
 
     Note over C,S: Login
@@ -21,7 +21,7 @@ sequenceDiagram
     S->>S: getUserByEmail(email)
     S->>S: bcrypt.compare(password, hash)
     S->>S: jwt.sign({userId, username, email})
-    S-->>C: "Set-Cookie: token=JWT (HttpOnly, SameSite=Strict)"
+    S-->>C: Set-Cookie: token=JWT (HttpOnly, SameSite=Strict)
     S-->>C: {id, username, email}
 
     Note over C,S: Session Restoration (every page load)
@@ -35,7 +35,7 @@ sequenceDiagram
 
     Note over C,S: Logout
     C->>S: POST /api/auth/logout
-    S-->>C: "Set-Cookie: token=; maxAge=0 (cleared)"
+    S-->>C: Set-Cookie: token=#59; maxAge=0 (cleared)
 ```
 
 ### Registration
