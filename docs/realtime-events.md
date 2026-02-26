@@ -8,10 +8,14 @@ Socket.IO is used for all real-time communication: message delivery, typing indi
 
 The client connects to the Socket.IO server using the same origin as the Vite dev server (proxied through Vite to `http://localhost:3000`). Authentication happens at the transport level via the `token` httpOnly cookie.
 
-```
-ws://localhost:5173/socket.io/?EIO=4&transport=websocket
-  → Vite proxy →
-ws://localhost:3000/socket.io/
+```mermaid
+graph LR
+    C["Client Browser<br/>ws://localhost:5173/socket.io/<br/>?EIO=4&transport=websocket"]
+    V["Vite Dev Proxy"]
+    S["Socket.IO Server<br/>ws://localhost:3000/socket.io/"]
+    
+    C -->|"WebSocket Upgrade"| V
+    V -->|"Proxy"| S
 ```
 
 If the cookie is missing or the JWT is invalid, the connection is rejected with a `UNAUTHORIZED` error before any event handlers run.
