@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSocket } from './useSocket';
 import { useAuth } from './useAuth';
 import { useChatStore } from '../store/chatStore';
@@ -21,6 +21,7 @@ export function useDMs(partnerId: string | null) {
 
   const messages = partnerId ? (dmMessages[partnerId] ?? []) : [];
   const [isLoading, setIsLoading] = useState(true);
+  const isLoadingMore = useRef(false);
 
   // Load conversations list
   useEffect(() => {
@@ -77,10 +78,12 @@ export function useDMs(partnerId: string | null) {
   }, [socket, partnerId, user, addDMMessage, setDMTyping]);
 
   const loadMore = useCallback(async () => {
-    if (!partnerId || messages.length === 0) return;
+    if (!partnerId || messages.length === 0 || isLoadingMore.current) return;
+    isLoadingMore.current = true;
     const oldest = messages[0];
     const older = await dmApi.getDMHistory(partnerId, oldest.createdAt);
     prependDMMessages(partnerId, older);
+    isLoadingMore.current = false;
   }, [partnerId, messages, prependDMMessages]);
 
   const sendDM = useCallback(

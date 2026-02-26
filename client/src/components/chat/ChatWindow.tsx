@@ -20,10 +20,16 @@ export function ChatWindow({ roomId, roomName }: ChatWindowProps) {
   const typingUsers = roomTyping ?? [];
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastMessageIdRef = useRef<string | null>(null);
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom only when a new message is appended (not when old ones are prepended)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length === 0) return;
+    const lastId = messages[messages.length - 1].id;
+    if (lastId !== lastMessageIdRef.current) {
+      lastMessageIdRef.current = lastId;
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   const handleScroll = () => {

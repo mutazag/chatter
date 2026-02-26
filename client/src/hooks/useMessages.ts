@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSocket } from './useSocket';
 import { useChatStore } from '../store/chatStore';
 import * as roomsApi from '../api/roomsApi';
@@ -9,6 +9,7 @@ export function useMessages(roomId: string | null) {
   const { roomMessages, setRoomMessages, addRoomMessage, prependRoomMessages, setRoomTyping } =
     useChatStore();
   const [isLoading, setIsLoading] = useState(true);
+  const isLoadingMore = useRef(false);
 
   const messages = roomId ? (roomMessages[roomId] ?? []) : [];
 
@@ -63,10 +64,12 @@ export function useMessages(roomId: string | null) {
   }, [socket, roomId, addRoomMessage, setRoomTyping]);
 
   const loadMore = useCallback(async () => {
-    if (!roomId || messages.length === 0) return;
+    if (!roomId || messages.length === 0 || isLoadingMore.current) return;
+    isLoadingMore.current = true;
     const oldest = messages[0];
     const older = await roomsApi.getRoomMessages(roomId, oldest.createdAt);
     prependRoomMessages(roomId, older);
+    isLoadingMore.current = false;
   }, [roomId, messages, prependRoomMessages]);
 
   const sendMessage = useCallback(
@@ -85,5 +88,5 @@ export function useMessages(roomId: string | null) {
     [socket, roomId],
   );
 
-  return { messages, loadMore, sendMessage, sendTyping };
+  return { messages, isLoading, loadMore, sendMessage, sendTyping };
 }
