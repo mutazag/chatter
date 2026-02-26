@@ -6,6 +6,22 @@ Chatter is a real-time chat application supporting public/private rooms and dire
 
 ## Documents
 
+### Product
+
+| Document | Description |
+|---|---|
+| [Product Requirements Document](./prd.md) | Vision, personas, user stories, feature list, success metrics, constraints, risks, roadmap |
+| [Functional Spec — Index](./functional-spec/README.md) | Index of all functional specifications |
+| [FS-01 Authentication](./functional-spec/01-authentication.md) | Registration, login, logout, session management |
+| [FS-02 Rooms](./functional-spec/02-rooms.md) | Discovery, creation, membership, sidebar |
+| [FS-03 Direct Messaging](./functional-spec/03-direct-messaging.md) | User search, DM conversations, conversation list |
+| [FS-04 Messaging](./functional-spec/04-messaging.md) | Composition, sending, receiving, history, typing indicators |
+| [FS-05 Image Sharing](./functional-spec/05-image-sharing.md) | Upload, preview, encoding, rendering, loading shimmer |
+| [FS-06 Real-time Behaviour](./functional-spec/06-realtime.md) | Socket lifecycle, event guarantees, failure modes |
+| [FS-07 UI & UX](./functional-spec/07-ui-ux.md) | Layout, design tokens, components, loading states, accessibility |
+
+### Engineering
+
 | Document | Description |
 |---|---|
 | [Architecture Overview](./architecture.md) | System design, layers, data-flow diagrams |
