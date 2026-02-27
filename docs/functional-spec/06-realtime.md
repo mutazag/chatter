@@ -69,11 +69,11 @@ sequenceDiagram
     participant S as Server
     participant CS as All Subscribers (including Client A)
 
-    CA->>S: room:message<br/>{ roomId, content }
+    CA->>S: room:message { roomId, content }
     Note over S: verify membership
-    Note over S: persist to DB<br/>(messageService.createMessage)
-    S->>CS: socket.to('room:&lt;roomId&gt;')<br/>.emit('room:message', { message })
-    Note over CS: addRoomMessage(roomId, message)<br/>in Zustand
+    Note over S: persist to DB via messageService.createMessage
+    S->>CS: emit room:message to room:[roomId]
+    Note over CS: addRoomMessage(roomId, message) in Zustand
 ```
 
 The sender receives their own message back via the broadcast. This ensures:
@@ -88,13 +88,13 @@ sequenceDiagram
     participant S as Server
     participant CB as Client B (receiver)
 
-    CA->>S: dm:send<br/>{ receiverId, content }
+    CA->>S: dm:send { receiverId, content }
     Note over S: validate receiver exists
-    Note over S: persist to DB<br/>(dmService.sendDM)
-    S->>CA: io.to('user:&lt;senderId&gt;')<br/>.emit('dm:message', { message })
-    S->>CB: io.to('user:&lt;receiverId&gt;')<br/>.emit('dm:message', { message })
-    Note over CA: addDMMessage(partnerKey, message)<br/>in Zustand
-    Note over CB: addDMMessage(partnerKey, message)<br/>in Zustand
+    Note over S: persist to DB via dmService.sendDM
+    S->>CA: emit dm:message to user:[senderId]
+    S->>CB: emit dm:message to user:[receiverId]
+    Note over CA: addDMMessage(partnerKey, message) in Zustand
+    Note over CB: addDMMessage(partnerKey, message) in Zustand
 ```
 
 The message is emitted to both the sender's and receiver's personal inbox rooms so both parties see it in real time.
@@ -119,9 +119,9 @@ sequenceDiagram
     participant S as Server
     participant CS as All Other Subscribers
 
-    CA->>S: room:typing<br/>{ roomId, isTyping }
-    S->>CS: socket.to('room:&lt;roomId&gt;')<br/>.emit('room:typing',<br/>{ roomId, userId, username, isTyping })
-    Note over CS: update roomTyping[roomId]<br/>in Zustand
+    CA->>S: room:typing { roomId, isTyping }
+    S->>CS: emit room:typing to room:[roomId]
+    Note over CS: update roomTyping[roomId] in Zustand
 ```
 
 The typing event is NOT saved to the database. It is ephemeral — lost on reconnect or refresh.
@@ -134,9 +134,9 @@ sequenceDiagram
     participant S as Server
     participant CB as Client B (receiver)
 
-    CA->>S: dm:typing<br/>{ receiverId, isTyping }
-    S->>CB: io.to('user:&lt;receiverId&gt;')<br/>.emit('dm:typing',<br/>{ senderId, isTyping })
-    Note over CB: update dmTyping[senderId]<br/>in Zustand
+    CA->>S: dm:typing { receiverId, isTyping }
+    S->>CB: emit dm:typing to user:[receiverId]
+    Note over CB: update dmTyping[senderId] in Zustand
 ```
 
 ### FR-RT-015 — Sender Does Not See Own Typing Indicator

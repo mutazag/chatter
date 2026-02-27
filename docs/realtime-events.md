@@ -253,18 +253,18 @@ sequenceDiagram
 
     User->>MI: types
     MI->>ST: onChange fires
-    ST->>Socket: emit('room:typing',<br/>{ roomId, isTyping: true })
-    Note over ST: 2 second debounce<br/>timer resets
+    ST->>Socket: emit room:typing isTyping=true
+    Note over ST: 2s debounce timer resets
     Socket->>Server: room:typing event
-    Server->>OC: broadcast to room:&lt;roomId&gt;
-    OC->>Z: setRoomTyping(rid, userId,<br/>username, true)
-    Z->>TI: re-render<br/>"Alice is typing..."
+    Server->>OC: broadcast to room:[roomId]
+    OC->>Z: setRoomTyping(userId, username, true)
+    Z->>TI: re-render "Alice is typing..."
 
     Note over User,TI: [2 seconds of no typing]
 
-    ST->>Socket: emit('room:typing',<br/>{ roomId, isTyping: false })
+    ST->>Socket: emit room:typing isTyping=false
     Socket->>Server: room:typing event
-    Server->>OC: broadcast to room:&lt;roomId&gt;
-    OC->>Z: setRoomTyping(rid, userId,<br/>username, false)
+    Server->>OC: broadcast to room:[roomId]
+    OC->>Z: setRoomTyping(userId, username, false)
     Z->>TI: empty (hidden)
 ```
