@@ -29,7 +29,10 @@
       "Bash(node:*)",
       "mcp__playwright__browser_file_upload",
       "mcp__playwright__browser_console_messages",
-      "mcp__playwright__browser_take_screenshot"
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(git -C /c/git/local/chatter remote get-url:*)",
+      "mcp__playwright__browser_install",
+      "Bash(git:*)"
     ]
   }
 }
