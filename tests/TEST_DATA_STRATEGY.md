@@ -6,7 +6,7 @@ This project uses a comprehensive test data cleanup strategy to ensure tests can
 
 The test framework automatically:
 1. ✅ Generates unique test data for each test run
-2. ✅ Tracks created test data during test execution  
+2. ✅ Tracks created test data during test execution
 3. ✅ Cleans up test data after each test automatically
 4. ✅ Prevents database conflicts between test runs
 
@@ -16,14 +16,15 @@ The test framework automatically:
 
 ```typescript
 test('My Test', async ({ page, testData }) => {
-  // Generate unique user credentials 
+  // Generate unique user credentials
   const testUser = testData.generateTestUser('mytest');
-  // Result: { username: 'mytest-test-1234567890-abc123', email: 'mytest-test-1234567890-abc123@example.com', password: 'password123' }
+  // Result: { username: 'mytest123456abc', email: 'mytest123456abc@example.com', password: 'password123' }
+  // (Password is read from test-data.json configuration)
 
   // Use in your test
   await page.getByRole('textbox', { name: 'Username' }).fill(testUser.username);
   await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
-  
+
   // The test data will be automatically cleaned up after the test
 });
 ```
@@ -34,7 +35,7 @@ test('My Test', async ({ page, testData }) => {
 // Generate unique email
 const email = testData.generateTestEmail('prefix');
 
-// Generate unique username  
+// Generate unique username
 const username = testData.generateTestUsername('prefix');
 
 // All generated data is automatically tracked for cleanup
@@ -52,7 +53,7 @@ testData.registerRoom('room-id-123');
 
 - ✅ **No more test conflicts** - Each test run uses unique identifiers
 - ✅ **Automatic cleanup** - No manual database reset needed
-- ✅ **Parallel test execution** - Tests don't interfere with each other  
+- ✅ **Parallel test execution** - Tests don't interfere with each other
 - ✅ **Easy debugging** - Test data is predictably named with timestamps
 - ✅ **Environment agnostic** - Works with any database setup
 
@@ -77,7 +78,7 @@ The cleanup utility connects to your PostgreSQL database using the same connecti
 After each test:
 
 1. Deletes all messages created by test users
-2. Deletes all direct messages involving test users  
+2. Deletes all direct messages involving test users
 3. Deletes all room memberships for test users
 4. Deletes all images uploaded by test users
 5. Deletes all rooms created by test users

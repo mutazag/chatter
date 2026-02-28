@@ -41,7 +41,7 @@ Edit `tests/test-data.json` with your test credentials:
   "users": {
     "validUser": {
       "username": "testuser123",
-      "email": "testuser123@example.com", 
+      "email": "testuser123@example.com",
       "password": "password123"
     }
   }
@@ -139,7 +139,7 @@ npm run test -- --project chromium
    ```bash
    # Terminal 1: Start backend
    npm run dev --workspace=server
-   
+
    # Terminal 2: Start frontend
    npm run dev --workspace=client
    ```

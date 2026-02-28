@@ -1,0 +1,50 @@
+{
+  "users": {
+    "validUser": {
+      "username": "testuser123",
+      "email": "testuser123@example.com",
+      "password": "password123"
+    },
+    "loginUser": {
+      "username": "loginuser",
+      "email": "loginuser@example.com",
+      "password": "password123"
+    },
+    "duplicateEmail": {
+      "username": "duplicate",
+      "email": "duplicate@example.com",
+      "password": "password123"
+    },
+    "passwordValidation": {
+      "username": "validuser",
+      "email": "validuser@example.com",
+      "password": "password123"
+    },
+    "testUser": {
+      "username": "testuser@example.com",
+      "email": "testuser@example.com",
+      "password": "TestPassword123!",
+      "displayName": "Test User"
+    }
+  },
+  "invalidCredentials": {
+    "nonExistentUser": {
+      "email": "nonexistent@example.com",
+      "password": "anypassword"
+    },
+    "validEmailWrongPassword": {
+      "email": "validuser@example.com",
+      "password": "wrongpassword"
+    },
+    "shortPassword": {
+      "password": "short"
+    }
+  },
+  "rooms": {
+    "testRoom": {
+      "name": "Test Room",
+      "description": "A test room for automated testing",
+      "isPrivate": false
+    }
+  }
+}

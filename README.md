@@ -92,8 +92,8 @@ npm run test:ui
 npm run test:report
 ```
 
-✅ **Zero-config testing** - Tests automatically clean up database state  
-✅ **Repeatable runs** - No "user already exists" errors  
-✅ **Parallel execution safe** - Tests don't interfere with each other  
+✅ **Zero-config testing** - Tests automatically clean up database state
+✅ **Repeatable runs** - No "user already exists" errors
+✅ **Parallel execution safe** - Tests don't interfere with each other
 
 See [Testing Guide](docs/testing.md) for complete documentation.
