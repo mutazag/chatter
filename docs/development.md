@@ -263,7 +263,7 @@ npm run test:report
 | **Chromium** | Primary browser for development testing |
 | **Cross-browser Testing** | Available for CI (Firefox, Safari, Mobile) |
 
-**Development Setup:** Tests run against Chromium only for speed  
+**Development Setup:** Tests run against Chromium only for speed
 **Production/CI:** Uncomment additional browsers in `playwright.config.ts` for comprehensive testing
 
 ### Test Data Strategy
@@ -281,7 +281,7 @@ Example test data generation:
 test('My Test', async ({ page, testData }) => {
   // Automatically generates: { username: 'user123456abc', email: 'user123456abc@example.com', password: 'password123' }
   const testUser = testData.generateTestUser('user');
-  
+
   // Use in test - will be automatically cleaned up after test
   await page.fill('[name="username"]', testUser.username);
   await page.fill('[name="email"]', testUser.email);
@@ -297,7 +297,7 @@ tests/
 │   └── db-cleanup.ts           ← Database cleanup implementation
 ├── auth/                       ← Authentication tests
 │   ├── successful-registration.spec.ts
-│   ├── successful-login.spec.ts  
+│   ├── successful-login.spec.ts
 │   ├── registration-duplicate-email.spec.ts
 │   └── registration-password-validation.spec.ts
 └── TEST_DATA_STRATEGY.md       ← Complete testing documentation
@@ -337,7 +337,7 @@ NODE_ENV="development"
 For complete isolation, create a separate test database:
 
 ```env
-# In .env.test  
+# In .env.test
 TEST_DATABASE_URL="postgresql://user:password@localhost:5432/chatter_test"
 NODE_ENV="test"
 ```

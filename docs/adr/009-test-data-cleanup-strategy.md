@@ -10,7 +10,7 @@ End-to-end testing with Playwright requires creating test data in the database (
 
 ### Problems with Static Test Data
 - **Test Data Pollution**: Tests fail on subsequent runs with "user already exists" errors
-- **Manual Cleanup Required**: Developers must manually reset database between test runs  
+- **Manual Cleanup Required**: Developers must manually reset database between test runs
 - **Parallel Test Conflicts**: Tests interfere with each other when using shared static credentials
 - **Inconsistent Environment**: Database state varies between test runs, causing flaky tests
 
@@ -40,7 +40,7 @@ Implement **Automatic Test Data Cleanup** with unique data generation:
 
 ```typescript
 // Each test generates unique, non-conflicting data
-const testUser = testData.generateTestUser('signup'); 
+const testUser = testData.generateTestUser('signup');
 // Result: { username: 'signup605847abc', email: 'signup605847abc@example.com', password: 'password123' }
 ```
 
@@ -52,9 +52,9 @@ export class TestDbCleanup {
   private static createdRooms: string[] = [];
 
   static registerUser(email: string) { /* Track user for cleanup */ }
-  
+
   static async cleanup() {
-    // Delete in dependency order: messages → memberships → rooms → users  
+    // Delete in dependency order: messages → memberships → rooms → users
   }
 }
 ```
@@ -68,7 +68,7 @@ export const test = base.extend({
       generateTestUser: (prefix) => TestDbCleanup.generateTestUser(prefix),
       cleanup: () => TestDbCleanup.cleanup()
     };
-    
+
     await use(testData);
     await testData.cleanup(); // Automatic cleanup after each test
   }
@@ -100,7 +100,7 @@ export const test = base.extend({
 ### Alternative 1: Database Reset Between Tests
 **Rejected** - Too slow and complex for CI/CD setup.
 
-### Alternative 2: Separate Test Database  
+### Alternative 2: Separate Test Database
 **Rejected** - Adds infrastructure complexity and schema sync issues.
 
 ### Alternative 3: Transaction Rollback
@@ -140,7 +140,7 @@ const random = Math.random().toString(36).substring(2, 5); // "abc"
 const testId = `${timestamp}${random}`; // "605847abc"
 
 // Results in usernames under 32 character limit
-const username = `${prefix}${testId}`; // e.g. "signup605847abc" 
+const username = `${prefix}${testId}`; // e.g. "signup605847abc"
 ```
 
 ## Monitoring and Maintenance
@@ -159,7 +159,7 @@ const username = `${prefix}${testId}`; // e.g. "signup605847abc"
 
 ### Phase 1: Core Implementation ✅ Complete
 - Implement `TestDbCleanup` utility
-- Update Playwright fixtures  
+- Update Playwright fixtures
 - Convert authentication tests
 
 ### Phase 2: Full Migration (Ongoing)
@@ -175,6 +175,6 @@ const username = `${prefix}${testId}`; // e.g. "signup605847abc"
 ## References
 
 - [Testing Guide](../testing.md) - Complete testing documentation
-- [Test Data Strategy](../../tests/TEST_DATA_STRATEGY.md) - Implementation details  
+- [Test Data Strategy](../../tests/TEST_DATA_STRATEGY.md) - Implementation details
 - [Playwright Best Practices](https://playwright.dev/docs/best-practices)
 - [Database Testing Patterns](https://martinfowler.com/articles/practical-test-pyramid.html#IntegrationTests)

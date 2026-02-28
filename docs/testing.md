@@ -6,11 +6,11 @@ Chatter uses **Playwright** for end-to-end testing with an advanced **automatic 
 
 ## Key Features
 
-✅ **Zero Configuration Testing** - Tests self-manage database state  
-✅ **Automatic Data Cleanup** - No manual database reset required  
-✅ **Parallel Test Execution** - Tests don't interfere with each other  
-✅ **Cross-Browser Testing** - Chromium, Firefox, Safari support  
-✅ **Repeatable Test Runs** - Run tests infinite times without conflicts  
+✅ **Zero Configuration Testing** - Tests self-manage database state
+✅ **Automatic Data Cleanup** - No manual database reset required
+✅ **Parallel Test Execution** - Tests don't interfere with each other
+✅ **Cross-Browser Testing** - Chromium, Firefox, Safari support
+✅ **Repeatable Test Runs** - Run tests infinite times without conflicts
 
 ---
 
@@ -101,16 +101,16 @@ test.describe('Feature Name', () => {
   test('specific behavior', async ({ page, testData }) => {
     // 1. Generate unique test data
     const testUser = testData.generateTestUser('feature');
-    
+
     // 2. Execute test actions
     await page.goto('/register');
     await page.fill('[name="username"]', testUser.username);
     await page.fill('[name="email"]', testUser.email);
     await page.click('[role="button"][name="Create Account"]');
-    
+
     // 3. Assert expected outcomes
     await expect(page.getByText('Welcome to Chatter')).toBeVisible();
-    
+
     // 4. Cleanup happens automatically
   });
 });
@@ -169,7 +169,7 @@ await api.createUser({ email: 'manual@test.com' });
 tests/
 ├── setup.ts                           # Playwright configuration + test utilities
 ├── utils/
-│   └── db-cleanup.ts                   # Database cleanup implementation  
+│   └── db-cleanup.ts                   # Database cleanup implementation
 ├── auth/                               # Authentication & session management
 │   ├── successful-registration.spec.ts
 │   ├── successful-login.spec.ts
@@ -207,7 +207,7 @@ Uses your existing development database with automatic cleanup after each test.
 ```env
 # server/.env
 DATABASE_URL="postgresql://user:password@localhost:5432/chatter_dev"
-NODE_ENV="development"  
+NODE_ENV="development"
 ```
 
 **Pros:**
@@ -258,7 +258,7 @@ export default defineConfig({
   globalTeardown: require.resolve('./tests/setup.ts'),
   fullyParallel: true,           // Run tests in parallel
   workers: process.env.CI ? 1 : undefined,
-  
+
   // Single browser for fast development
   projects: [
     {
@@ -268,14 +268,14 @@ export default defineConfig({
     // Additional browsers commented out for speed
     // Uncomment for cross-browser testing in CI
   ],
-  
+
   webServer: [
     {
       command: 'npm run dev --workspace=server',
       port: 3000,
     },
     {
-      command: 'npm run dev --workspace=client', 
+      command: 'npm run dev --workspace=client',
       port: 5173,
     },
   ],
@@ -285,7 +285,7 @@ export default defineConfig({
 #### Development vs Production Testing
 
 **Development (Fast):** Tests run against Chromium only
-- ✅ **5x faster** test execution  
+- ✅ **5x faster** test execution
 - ✅ Quick feedback loop
 - ✅ Sufficient for most development work
 
@@ -341,7 +341,7 @@ npm run test:ui
 # Debug specific test
 npx playwright test --debug tests/auth/successful-registration.spec.ts
 
-# Run in headed mode  
+# Run in headed mode
 npx playwright test --headed
 ```
 
@@ -386,7 +386,7 @@ await prisma.$connect();
 await page.waitForURL('/chat');
 await page.waitForSelector('[data-testid="welcome-message"]');
 
-// Use reliable selectors  
+// Use reliable selectors
 await page.getByRole('button', { name: 'Sign In' }).click();  // ✅ Good
 await page.click('.btn-primary');                             // ❌ Fragile
 ```
@@ -406,7 +406,7 @@ test('user registration A', async ({ testData }) => {
 });
 
 test('user registration B', async ({ testData }) => {
-  const user = testData.generateTestUser('b'); // user605847def@example.com  
+  const user = testData.generateTestUser('b'); // user605847def@example.com
 });
 ```
 
@@ -417,17 +417,17 @@ test('user registration B', async ({ testData }) => {
 test('room membership workflow', async ({ page, testData }) => {
   const roomCreator = testData.generateTestUser('creator');
   const roomMember = testData.generateTestUser('member');
-  
+
   // Create room as first user
   await registerAndLogin(page, roomCreator);
   const roomName = `testroom-${Date.now()}`;
   await createRoom(page, roomName);
   testData.registerRoom(roomName); // Track for cleanup
-  
+
   // Join room as second user
   await registerAndLogin(page, roomMember);
   await joinRoom(page, roomName);
-  
+
   // Both users and room cleaned up automatically
 });
 ```
@@ -441,7 +441,7 @@ graph TD
     A[Test Completes] --> B[Cleanup Triggered]
     B --> C[Delete Messages]
     B --> D[Delete DirectMessages]
-    B --> E[Delete RoomMemberships] 
+    B --> E[Delete RoomMemberships]
     B --> F[Delete Images]
     C & D & E & F --> G[Delete Rooms]
     G --> H[Delete Users]
@@ -464,7 +464,7 @@ Cleanup order prevents foreign key constraint violations.
 
 ```yaml
 # Example GitHub Actions workflow
-- name: Run Playwright tests  
+- name: Run Playwright tests
   run: npx playwright test
   env:
     DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
@@ -492,7 +492,7 @@ test('registration', async ({ page, testData }) => {
   await page.fill('[name="email"]', testData.users.validUser.email);
 });
 
-// ✅ After (robust)  
+// ✅ After (robust)
 test('registration', async ({ page, testData }) => {
   const user = testData.generateTestUser('registration');
   await page.fill('[name="email"]', user.email);
@@ -524,7 +524,7 @@ Replace with dynamic generation in tests.
 1. **Use the test template**:
    ```typescript
    import { test, expect } from '../setup';
-   
+
    test.describe('Feature Name', () => {
      test('specific behavior', async ({ page, testData }) => {
        const testUser = testData.generateTestUser('feature');

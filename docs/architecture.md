@@ -159,7 +159,7 @@ chatter/
     ├── prisma/
     │   └── schema.prisma ← Database schema
     └── tests/            ← Playwright E2E tests with automatic data cleanup
-        ├── auth/         ← Authentication tests  
+        ├── auth/         ← Authentication tests
         ├── utils/        ← Test utilities and database cleanup
         └── setup.ts      ← Test configuration and fixtures
 ```
