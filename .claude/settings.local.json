@@ -32,7 +32,8 @@
       "mcp__playwright__browser_take_screenshot",
       "Bash(git -C /c/git/local/chatter remote get-url:*)",
       "mcp__playwright__browser_install",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "mcp__Neon__get_doc_resource"
     ]
   }
 }
