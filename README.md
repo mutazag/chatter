@@ -76,3 +76,24 @@ Open `http://localhost:5173` in your browser.
 2. Create a room from account A, join from account B — verify real-time messages appear in both tabs
 3. Open a DM from account A to account B — verify messages and typing indicators work
 4. Refresh the page — session restores from cookie, messages persist from PostgreSQL
+
+## Testing
+
+The project includes comprehensive end-to-end tests with automatic test data cleanup:
+
+```bash
+# Run all tests
+npm test
+
+# Run with UI for debugging
+npm run test:ui
+
+# Generate test report
+npm run test:report
+```
+
+✅ **Zero-config testing** - Tests automatically clean up database state  
+✅ **Repeatable runs** - No "user already exists" errors  
+✅ **Parallel execution safe** - Tests don't interfere with each other  
+
+See [Testing Guide](docs/testing.md) for complete documentation.

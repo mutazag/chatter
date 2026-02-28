@@ -6,3 +6,12 @@ server/prisma/migrations/
 .DS_Store
 *.log
 server/uploads/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Test data (sensitive credentials)
+tests/test-data.json
