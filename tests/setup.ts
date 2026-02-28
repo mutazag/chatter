@@ -38,6 +38,7 @@ export const test = base.extend({
 
       generateTestEmail: (prefix = 'test') => TestDbCleanup.generateTestEmail(prefix),
       generateTestUsername: (prefix = 'user') => TestDbCleanup.generateTestUsername(prefix),
+      generateTestId: (prefix = '') => prefix ? `${prefix}${TestDbCleanup.generateTestId()}` : TestDbCleanup.generateTestId(),
 
       // Register created data for cleanup
       registerUser: (email: string) => TestDbCleanup.registerUser(email),
