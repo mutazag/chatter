@@ -280,6 +280,7 @@ Example test data generation:
 ```typescript
 test('My Test', async ({ page, testData }) => {
   // Automatically generates: { username: 'user123456abc', email: 'user123456abc@example.com', password: 'password123' }
+  // (Password read from test-data.json configuration)
   const testUser = testData.generateTestUser('user');
 
   // Use in test - will be automatically cleaned up after test

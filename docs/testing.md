@@ -84,7 +84,7 @@ Example generated test data:
 {
   username: 'user605847abc',
   email: 'user605847abc@example.com',
-  password: 'password123'
+  password: 'password123'  // Read from test-data.json
 }
 ```
 

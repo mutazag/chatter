@@ -42,6 +42,7 @@ Implement **Automatic Test Data Cleanup** with unique data generation:
 // Each test generates unique, non-conflicting data
 const testUser = testData.generateTestUser('signup');
 // Result: { username: 'signup605847abc', email: 'signup605847abc@example.com', password: 'password123' }
+// (Password read from test-data.json configuration)
 ```
 
 ### Automatic Tracking and Cleanup
