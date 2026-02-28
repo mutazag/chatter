@@ -98,6 +98,10 @@ Open [http://localhost:5173](http://localhost:5173).
 |---|---|---|
 | `npm run dev` | `concurrently ...` | Start client + server in parallel |
 | `npm run build` | `npm run build -w server && npm run build -w client` | Production build both packages |
+| `npm test` | `playwright test` | Run end-to-end tests with Playwright |
+| `npm run test:ui` | `playwright test --ui` | Run tests with Playwright UI mode |
+| `npm run test:debug` | `playwright test --debug` | Run tests in debug mode |
+| `npm run test:report` | `playwright show-report` | Show HTML test report |
 
 ### Server (`npm run <script> --workspace=server`)
 
@@ -224,3 +228,132 @@ If port 3000 or 5173 is occupied, either kill the conflicting process or change 
 | React DevTools | Component tree inspection and profiling |
 | Postman / Insomnia | Manual API testing (note: you'll need to handle cookie auth) |
 | Prisma Studio | Visual DB browser (`npm run db:studio --workspace=server`) |
+
+---
+
+## Testing
+
+### Quick Start
+
+```bash
+# Install Playwright browsers (one-time setup)
+npm run test:install
+
+# Run all tests
+npm test
+
+# Run tests with UI (interactive)
+npm run test:ui
+
+# Run specific test file
+npx playwright test tests/auth/successful-registration.spec.ts
+
+# Debug mode (browser stays open, step through)
+npm run test:debug
+
+# Show test report
+npm run test:report
+```
+
+### Test Framework
+
+| Tool | Purpose |
+|---|---|
+| **Playwright** | End-to-end testing framework |
+| **Chromium** | Primary browser for development testing |
+| **Cross-browser Testing** | Available for CI (Firefox, Safari, Mobile) |
+
+**Development Setup:** Tests run against Chromium only for speed  
+**Production/CI:** Uncomment additional browsers in `playwright.config.ts` for comprehensive testing
+
+### Test Data Strategy
+
+The test suite uses **automatic test data cleanup** to ensure tests can be run repeatedly without conflicts:
+
+- ✅ **Unique Test Data**: Each test generates unique usernames/emails using timestamps
+- ✅ **Automatic Cleanup**: All test data is automatically removed after each test
+- ✅ **Parallel Execution**: Tests don't interfere with each other
+- ✅ **Repeitable Runs**: No "user already exists" errors on repeated runs
+
+Example test data generation:
+
+```typescript
+test('My Test', async ({ page, testData }) => {
+  // Automatically generates: { username: 'user123456abc', email: 'user123456abc@example.com', password: 'password123' }
+  const testUser = testData.generateTestUser('user');
+  
+  // Use in test - will be automatically cleaned up after test
+  await page.fill('[name="username"]', testUser.username);
+  await page.fill('[name="email"]', testUser.email);
+});
+```
+
+### Test Organization
+
+```
+tests/
+├── setup.ts                    ← Test fixtures and cleanup utilities
+├── utils/
+│   └── db-cleanup.ts           ← Database cleanup implementation
+├── auth/                       ← Authentication tests
+│   ├── successful-registration.spec.ts
+│   ├── successful-login.spec.ts  
+│   ├── registration-duplicate-email.spec.ts
+│   └── registration-password-validation.spec.ts
+└── TEST_DATA_STRATEGY.md       ← Complete testing documentation
+```
+
+### Writing Tests
+
+When writing new tests:
+
+1. **Always use generated test data**:
+   ```typescript
+   const testUser = testData.generateTestUser('prefix'); // ✅ Good
+   const staticUser = testData.users.validUser;         // ❌ Causes conflicts
+   ```
+
+2. **Register manually created data for cleanup**:
+   ```typescript
+   // If creating users via API calls
+   testData.registerUser('manually-created@example.com');
+   testData.registerRoom('room-id-123');
+   ```
+
+3. **Leverage automatic cleanup** - no manual database reset needed
+
+### Database Testing Environment
+
+#### Option 1: Same Database with Cleanup (Recommended)
+Uses your existing development database with automatic test data cleanup.
+
+```env
+# In server/.env
+DATABASE_URL="postgresql://user:password@localhost:5432/chatter_dev"
+NODE_ENV="development"
+```
+
+#### Option 2: Separate Test Database (Optional)
+For complete isolation, create a separate test database:
+
+```env
+# In .env.test  
+TEST_DATABASE_URL="postgresql://user:password@localhost:5432/chatter_test"
+NODE_ENV="test"
+```
+
+### Common Test Scenarios
+
+| Test Type | Example | Location |
+|---|---|---|
+| Authentication | Registration, login, logout | `tests/auth/` |
+| Room Management | Create room, join room, leave room | `tests/rooms/` |
+| Messaging | Send message, receive message, typing indicators | `tests/messaging/` |
+| Direct Messages | Start DM, send DM, message history | `tests/dm/` |
+| File Upload | Image upload, display, validation | `tests/upload/` |
+
+See [`tests/TEST_DATA_STRATEGY.md`](../tests/TEST_DATA_STRATEGY.md) for complete testing documentation.
+
+---
+
+## Debugging

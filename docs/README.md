@@ -30,6 +30,7 @@ Chatter is a real-time chat application supporting public/private rooms and dire
 | [Real-time Events](./realtime-events.md) | Socket.IO event catalogue (client ↔ server) |
 | [Frontend Architecture](./frontend.md) | React component tree, state management, hooks |
 | [Authentication & Security](./auth.md) | Auth flow, JWT cookies, rate limiting, CORS |
+| [Testing Guide](./testing.md) | E2E testing, test data strategy, automated cleanup |
 | [Development Guide](./development.md) | Local setup, scripts, environment variables |
 | [Deployment Guide](./deployment.md) | Production checklist, environment, database migration |
 
@@ -45,3 +46,4 @@ Chatter is a real-time chat application supporting public/private rooms and dire
 | [ADR-006](./adr/006-image-storage-database.md) | Image Storage in Database (not Filesystem) |
 | [ADR-007](./adr/007-cursor-based-pagination.md) | Cursor-based Pagination for Message History |
 | [ADR-008](./adr/008-image-message-encoding.md) | Inline Image Encoding in Message Content |
+| [ADR-009](./adr/009-test-data-cleanup-strategy.md) | Automatic Test Data Cleanup Strategy |

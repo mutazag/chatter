@@ -156,8 +156,12 @@ chatter/
     │   ├── app.ts        ← Express factory
     │   ├── socket.ts     ← Socket.IO factory
     │   └── index.ts      ← Entry point
-    └── prisma/
-        └── schema.prisma ← Database schema
+    ├── prisma/
+    │   └── schema.prisma ← Database schema
+    └── tests/            ← Playwright E2E tests with automatic data cleanup
+        ├── auth/         ← Authentication tests  
+        ├── utils/        ← Test utilities and database cleanup
+        └── setup.ts      ← Test configuration and fixtures
 ```
 
 ---
@@ -172,6 +176,7 @@ chatter/
 | Pagination | Cursor (createdAt) | Stable under concurrent inserts; no page drift |
 | Image storage | PostgreSQL `Bytes` | No external storage service; consistent backup with data |
 | Image encoding | `[img]<url>\ncaption` | No schema change; images and text coexist in a single message |
+| Test data strategy | Automatic cleanup with unique generation | Zero-config repeatable tests; no manual database reset |
 
 See the [ADR directory](./adr/) for full decision rationale.
 
