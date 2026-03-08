@@ -14,12 +14,12 @@ test.describe('Authentication and Session Management', () => {
     await page.getByRole('textbox', { name: 'Email' }).fill(logoutUser.email);
     await page.getByRole('textbox', { name: 'Password' }).fill(logoutUser.password);
     await page.getByRole('button', { name: 'Create Account' }).click();
+    await expect(page).toHaveURL('http://localhost:5173/chat');
 
     // Verify user is logged in and has access to authenticated content
     await expect(page.getByText(logoutUser.username)).toBeVisible();
     await expect(page.getByText('Welcome to Chatter')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
-    await expect(page).toHaveURL('http://localhost:5173/chat');
 
     // Test logout functionality - click the Sign out button
     await page.getByRole('button', { name: 'Sign out' }).click();

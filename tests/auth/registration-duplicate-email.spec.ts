@@ -16,9 +16,9 @@ test.describe('Authentication and Session Management', () => {
     await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
     await page.getByRole('textbox', { name: 'Password' }).fill(testUser.password);
     await page.getByRole('button', { name: 'Create Account' }).click();
+    await expect(page).toHaveURL('http://localhost:5173/chat');
 
     // Wait for successful registration and logout
-    await expect(page.getByText('Welcome to Chatter')).toBeVisible();
     await page.getByRole('button', { name: 'Sign out' }).click();
 
     // Navigate to registration page to test duplicate email scenario

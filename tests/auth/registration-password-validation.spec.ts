@@ -42,6 +42,7 @@ test.describe('Authentication and Session Management', () => {
 
     // Submit the form with a valid password to verify successful registration after correction
     await page.getByRole('button', { name: 'Create Account' }).click();
+    await expect(page).toHaveURL('http://localhost:5173/chat');
 
     // Verify successful registration after password correction
     await expect(page.getByText(testUser.username)).toBeVisible();
