@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Avatar } from '../shared/Avatar';
 import type { Message, DirectMessage } from '../../types';
 
@@ -23,19 +23,44 @@ interface MessageBubbleProps {
   currentUserId: string;
 }
 
-function MessageImage({ src }: { src: string }) {
+function MessageImage({ src, caption }: { src: string; caption?: string | null }) {
   const [loaded, setLoaded] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
+
   return (
-    <div className="msg-image-wrap">
-      {!loaded && <div className="skeleton msg-image-skeleton" />}
-      <img
-        className={`msg-image ${loaded ? 'msg-image-loaded' : 'msg-image-loading'}`}
-        src={src}
-        alt="image"
-        onLoad={() => setLoaded(true)}
-        onClick={() => window.open(src, '_blank')}
-      />
-    </div>
+    <>
+      <div className="msg-image-wrap">
+        {!loaded && <div className="skeleton msg-image-skeleton" />}
+        <img
+          className={`msg-image ${loaded ? 'msg-image-loaded' : 'msg-image-loading'}`}
+          src={src}
+          alt="image"
+          onLoad={() => setLoaded(true)}
+          onClick={() => setOpen(true)}
+        />
+      </div>
+      {open && (
+        <div className="lightbox-overlay" onClick={() => setOpen(false)}>
+          <button className="lightbox-close" onClick={() => setOpen(false)} aria-label="Close">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="1" y1="1" x2="13" y2="13" />
+              <line x1="13" y1="1" x2="1" y2="13" />
+            </svg>
+          </button>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img className="lightbox-img" src={src} alt="Full size" />
+            {caption && <p className="lightbox-caption">{caption}</p>}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -57,7 +82,7 @@ export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
             const { imageUrl, text } = parseContent(message.content);
             return (
               <>
-                {imageUrl && <MessageImage src={imageUrl} />}
+                {imageUrl && <MessageImage src={imageUrl} caption={text} />}
                 {text && <span className="message-text">{text}</span>}
               </>
             );
