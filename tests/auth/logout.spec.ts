@@ -5,50 +5,73 @@ import { test, expect } from '../setup';
 
 test.describe('Authentication and Session Management', () => {
   test('Successful User Logout', async ({ page, testData }) => {
-    // Generate unique user credentials for this test
     const logoutUser = testData.generateTestUser('logoutuser');
 
-    // First, register and login a test user (prerequisite)
-    await page.goto('http://localhost:5173/register');
-    await page.getByRole('textbox', { name: 'Username' }).fill(logoutUser.username);
-    await page.getByRole('textbox', { name: 'Email' }).fill(logoutUser.email);
-    await page.getByRole('textbox', { name: 'Password' }).fill(logoutUser.password);
-    await page.getByRole('button', { name: 'Create Account' }).click();
-    await expect(page).toHaveURL('http://localhost:5173/chat');
+    await test.step('Register and login a user (prerequisite)', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(logoutUser.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(logoutUser.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(logoutUser.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Registration should succeed and redirect to /chat before we can test logout',
+      });
+    });
 
-    // Verify user is logged in and has access to authenticated content
-    await expect(page.getByText(logoutUser.username)).toBeVisible();
-    await expect(page.getByText('Welcome to Chatter')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
+    await test.step('Verify authenticated state before logout', async () => {
+      await expect(page.getByText(logoutUser.username)).toBeVisible({
+        message: 'Username should appear in the header confirming the user is logged in',
+      });
+      await expect(page.getByText('Welcome to Chatter')).toBeVisible({
+        message: 'Welcome message should be visible confirming access to authenticated content',
+      });
+      await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible({
+        message: 'Sign out button should be available confirming authenticated state',
+      });
+    });
 
-    // Test logout functionality - click the Sign out button
-    await page.getByRole('button', { name: 'Sign out' }).click();
+    await test.step('Log out', async () => {
+      await page.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/login', {
+        message: 'Logout should redirect to /login — session may not have been cleared server-side',
+      });
+    });
 
-    // Verify user is redirected to login page after logout
-    await expect(page).toHaveURL('http://localhost:5173/login');
+    await test.step('Verify session is fully cleared after logout', async () => {
+      await expect(page.getByText(logoutUser.username)).not.toBeVisible({
+        message: 'Username should no longer appear after logout',
+      });
+      await expect(page.getByText('Welcome to Chatter')).not.toBeVisible({
+        message: 'Authenticated content should not be visible after logout',
+      });
+      await expect(page.getByRole('button', { name: 'Sign out' })).not.toBeVisible({
+        message: 'Sign out button should not be visible after logout',
+      });
+      await expect(page.getByRole('textbox', { name: 'Email' })).toBeVisible({
+        message: 'Login form should be shown after logout',
+      });
+      await expect(page.getByRole('textbox', { name: 'Password' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
+    });
 
-    // Verify authentication state is cleared - protected content should not be accessible
-    await expect(page.getByText(logoutUser.username)).not.toBeVisible();
-    await expect(page.getByText('Welcome to Chatter')).not.toBeVisible();
-    await expect(page.getByRole('button', { name: 'Sign out' })).not.toBeVisible();
+    await test.step('Verify protected routes are inaccessible after logout', async () => {
+      await page.goto('http://localhost:5173/chat');
+      await expect(page).toHaveURL('http://localhost:5173/login', {
+        message: 'Navigating to /chat after logout should redirect to /login — route guard may not be working',
+      });
+    });
 
-    // Verify login form is available for re-authentication
-    await expect(page.getByRole('textbox', { name: 'Email' })).toBeVisible();
-    await expect(page.getByRole('textbox', { name: 'Password' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible();
-
-    // Verify user cannot access protected routes directly after logout
-    await page.goto('http://localhost:5173/chat');
-    await expect(page).toHaveURL('http://localhost:5173/login');
-
-    // Verify that user can log back in with same credentials (session properly cleared)
-    await page.getByRole('textbox', { name: 'Email' }).fill(logoutUser.email);
-    await page.getByRole('textbox', { name: 'Password' }).fill(logoutUser.password);
-    await page.getByRole('button', { name: 'Sign In' }).click();
-
-    // Verify successful re-login after logout
-    await expect(page.getByText(logoutUser.username)).toBeVisible();
-    await expect(page.getByText('Welcome to Chatter')).toBeVisible();
-    await expect(page).toHaveURL('http://localhost:5173/chat');
+    await test.step('Verify user can log back in after logout', async () => {
+      await page.getByRole('textbox', { name: 'Email' }).fill(logoutUser.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(logoutUser.password);
+      await page.getByRole('button', { name: 'Sign In' }).click();
+      await expect(page.getByText(logoutUser.username)).toBeVisible({
+        message: 'Username should appear after re-login confirming credentials were not invalidated by logout',
+      });
+      await expect(page.getByText('Welcome to Chatter')).toBeVisible();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Re-login should redirect to /chat',
+      });
+    });
   });
 });

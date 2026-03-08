@@ -6,48 +6,47 @@ import { test, expect } from '../setup';
 test.describe('Authentication and Session Management', () => {
   test('Registration Password Length Validation', async ({ page, testData }) => {
     const { shortPassword } = testData.invalidCredentials;
-
-    // Generate unique user credentials for this test
     const testUser = testData.generateTestUser('passwordtest');
 
-    // Navigate to registration page to test password length validation
-    await page.goto('http://localhost:5173/register');
+    await test.step('Navigate to registration page', async () => {
+      await page.goto('http://localhost:5173/register');
+    });
 
-    // Enter a valid username for password validation test
-    await page.getByRole('textbox', { name: 'Username' }).fill(testUser.username);
+    await test.step('Submit registration form with a short password', async () => {
+      await page.getByRole('textbox', { name: 'Username' }).fill(testUser.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(shortPassword.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+    });
 
-    // Enter a valid email for password validation test
-    await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
+    await test.step('Verify client-side password validation error is shown', async () => {
+      await expect(page.getByText('Password must be at least 6 characters')).toBeVisible({
+        message: 'Client-side validation should block submission and show a password length error',
+      });
+      await expect(page.getByRole('textbox', { name: 'Username' })).toHaveValue(testUser.username, {
+        message: 'Username field should retain its value after validation failure',
+      });
+      await expect(page.getByRole('textbox', { name: 'Email' })).toHaveValue(testUser.email, {
+        message: 'Email field should retain its value after validation failure',
+      });
+      await expect(page).toHaveURL('http://localhost:5173/register', {
+        message: 'Client-side validation should prevent form submission — no network request should have been made',
+      });
+    });
 
-    // Enter a password with fewer than 6 characters to test client-side validation
-    await page.getByRole('textbox', { name: 'Password' }).fill(shortPassword.password);
+    await test.step('Correct the password and resubmit', async () => {
+      await page.getByRole('textbox', { name: 'Password' }).fill(testUser.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Registration should succeed after providing a valid password',
+      });
+    });
 
-    // Attempt to submit the form with a short password to test client-side validation
-    await page.getByRole('button', { name: 'Create Account' }).click();
-
-    // Verify that the password length validation error message is displayed
-    await expect(page.getByText('Password must be at least 6 characters')).toBeVisible();
-
-    // Verify that the username field retained its value after validation failure
-    await expect(page.getByRole('textbox', { name: 'Username' })).toHaveValue(testUser.username);
-
-    // Verify that the email field retained its value after validation failure
-    await expect(page.getByRole('textbox', { name: 'Email' })).toHaveValue(testUser.email);
-
-    // Verify that we're still on the registration page (no network request was made)
-    await expect(page).toHaveURL('http://localhost:5173/register');
-
-    // Enter a valid password with at least 6 characters to test successful submission after correction
-    await page.getByRole('textbox', { name: 'Password' }).fill(testUser.password);
-
-    // Submit the form with a valid password to verify successful registration after correction
-    await page.getByRole('button', { name: 'Create Account' }).click();
-    await expect(page).toHaveURL('http://localhost:5173/chat');
-
-    // Verify successful registration after password correction
-    await expect(page.getByText(testUser.username)).toBeVisible();
-
-    // Verify successful redirect to /chat after correction
-    await expect(page).toHaveURL('http://localhost:5173/chat');
+    await test.step('Verify successful registration after password correction', async () => {
+      await expect(page.getByText(testUser.username)).toBeVisible({
+        message: 'Username should appear in the header confirming successful registration',
+      });
+      await expect(page).toHaveURL('http://localhost:5173/chat');
+    });
   });
 });

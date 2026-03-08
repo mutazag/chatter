@@ -6,52 +6,51 @@ import { test, expect } from '../setup';
 test.describe('Authentication and Session Management', () => {
   test('Registration with Duplicate Email', async ({ page, testData }) => {
     const { duplicateEmail } = testData.users;
-
-    // Generate unique user credentials for this test
     const testUser = testData.generateTestUser('firstuser');
 
-    // First, register a user with a specific email (prerequisite)
-    await page.goto('http://localhost:5173/register');
-    await page.getByRole('textbox', { name: 'Username' }).fill(testUser.username);
-    await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
-    await page.getByRole('textbox', { name: 'Password' }).fill(testUser.password);
-    await page.getByRole('button', { name: 'Create Account' }).click();
-    await expect(page).toHaveURL('http://localhost:5173/chat');
+    await test.step('Register first user with a specific email (prerequisite)', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(testUser.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(testUser.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'First registration should succeed before we can test duplicate email rejection',
+      });
+      await page.getByRole('button', { name: 'Sign out' }).click();
+    });
 
-    // Wait for successful registration and logout
-    await page.getByRole('button', { name: 'Sign out' }).click();
+    await test.step('Attempt to register a second user with the same email', async () => {
+      await page.goto('http://localhost:5173/register');
+      const anotherUsername = testData.generateTestUsername('anotheruser');
+      await page.getByRole('textbox', { name: 'Username' }).fill(anotherUsername);
+      await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill('password456');
+      await page.getByRole('button', { name: 'Create Account' }).click();
 
-    // Navigate to registration page to test duplicate email scenario
-    await page.goto('http://localhost:5173/register');
+      await test.step('Verify duplicate email error is shown', async () => {
+        await expect(page.getByText('Email already in use')).toBeVisible({
+          message: 'Server should reject registration with an already-registered email',
+        });
+      });
 
-    // Generate another unique username for the duplicate email test
-    const anotherUsername = testData.generateTestUsername('anotheruser');
+      await test.step('Verify form stays open with values retained', async () => {
+        await expect(page.getByRole('button', { name: 'Create Account' })).toBeVisible({
+          message: 'Create Account button should still be visible — form should not have been dismissed',
+        });
+        await expect(page.getByRole('textbox', { name: 'Username' })).toHaveValue(anotherUsername, {
+          message: 'Username field should retain its value after failed submission',
+        });
+        await expect(page.getByRole('textbox', { name: 'Email' })).toHaveValue(testUser.email, {
+          message: 'Email field should retain its value after failed submission',
+        });
+      });
 
-    // Enter a different username to test duplicate email validation
-    await page.getByRole('textbox', { name: 'Username' }).fill(anotherUsername);
-
-    // Enter the same email address that was already registered to test duplicate email validation
-    await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
-
-    // Enter a valid password for the duplicate email test
-    await page.getByRole('textbox', { name: 'Password' }).fill('password456');
-
-    // Submit the registration form with duplicate email to trigger validation error
-    await page.getByRole('button', { name: 'Create Account' }).click();
-
-    // Verify that the duplicate email error message is displayed
-    await expect(page.getByText('Email already in use')).toBeVisible();
-
-    // Verify that the Create Account button is still visible, showing the form remains open
-    await expect(page.getByRole('button', { name: 'Create Account' })).toBeVisible();
-
-    // Verify that the username field retained its value after failed submission
-    await expect(page.getByRole('textbox', { name: 'Username' })).toHaveValue(anotherUsername);
-
-    // Verify that the email field retained its value after failed submission
-    await expect(page.getByRole('textbox', { name: 'Email' })).toHaveValue(testUser.email);
-
-    // Verify we're still on the registration page (no navigation occurred)
-    await expect(page).toHaveURL('http://localhost:5173/register');
+      await test.step('Verify no navigation occurred', async () => {
+        await expect(page).toHaveURL('http://localhost:5173/register', {
+          message: 'Failed registration should not navigate away from /register',
+        });
+      });
+    });
   });
 });

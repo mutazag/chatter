@@ -6,130 +6,134 @@ import { TestDbCleanup } from '../utils/db-cleanup';
 
 test.describe('Room Management', () => {
   test('Create Room - FR-RM-012, FR-RM-013', async ({ page, testData }) => {
-    // Generate unique user credentials for this test
     const roomCreator = testData.generateTestUser('roomcreator');
     const roomName = `testroom${TestDbCleanup.generateTestId()}`;
     const roomDescription = 'A test room for automated testing purposes';
 
-    // First, register and login a test user (prerequisite)
-    await page.goto('http://localhost:5173/register');
-    await page.getByRole('textbox', { name: 'Username' }).fill(roomCreator.username);
-    await page.getByRole('textbox', { name: 'Email' }).fill(roomCreator.email);
-    await page.getByRole('textbox', { name: 'Password' }).fill(roomCreator.password);
-    await page.getByRole('button', { name: 'Create Account' }).click();
+    await test.step('Register and login a user (prerequisite)', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(roomCreator.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(roomCreator.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(roomCreator.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Registration must succeed before we can test room creation',
+      });
+    });
 
-    // Verify user is logged in and at chat page
-    await expect(page.getByText('Welcome to Chatter')).toBeVisible();
-    await expect(page).toHaveURL('http://localhost:5173/chat');
+    await test.step('Open the room creation modal (FR-RM-012)', async () => {
+      await page.getByTitle('Browse / Create rooms').click();
+      await expect(page.getByRole('heading', { name: 'Rooms' })).toBeVisible({
+        message: 'Rooms modal should open after clicking the browse/create button',
+      });
+      await page.getByText('+ Create Room').click();
+      await expect(page.getByRole('heading', { name: 'Create Room' })).toBeVisible({
+        message: 'Create Room modal should open after clicking "+ Create Room"',
+      });
+    });
 
-    // Click the "+" button next to "Rooms" to open the browse/create modal
-    await page.getByTitle('Browse / Create rooms').click();
+    await test.step('Fill in and submit the create room form', async () => {
+      await page.getByLabel('Room name').fill(roomName);
+      await page.getByLabel('Description (optional)').fill(roomDescription);
+      await page.getByRole('button', { name: 'Create Room' }).click();
+    });
 
-    // Verify rooms modal is open
-    await expect(page.getByRole('heading', { name: 'Rooms' })).toBeVisible(); // Modal title
+    await test.step('Verify room was created successfully (FR-RM-013)', async () => {
+      await expect(page.getByRole('heading', { name: 'Create Room' })).not.toBeVisible({
+        message: 'Create Room modal should close after successful creation',
+      });
+      await expect(page.getByRole('button', { name: `# ${roomName}` })).toBeVisible({
+        message: 'New room should appear in the sidebar after creation',
+      });
+      await expect(page.getByText(`# ${roomName}`)).toBeVisible({
+        message: 'Chat area should display the new room name, confirming the active view switched to it',
+      });
+      await expect(page).toHaveURL(/\/chat/, {
+        message: 'Should remain on the chat page after room creation',
+      });
+    });
 
-    // Click the "+ Create Room" button to open the create room modal
-    await page.getByText('+ Create Room').click();
-
-    // Verify create room modal is visible (FR-RM-012)
-    await expect(page.getByRole('heading', { name: 'Create Room' })).toBeVisible(); // Modal title
-
-    // Fill in room name (required field)
-    await page.getByLabel('Room name').fill(roomName);
-
-    // Fill in room description (optional field)
-    await page.getByLabel('Description (optional)').fill(roomDescription);
-
-    // Leave private checkbox unchecked (default public room)
-    // await page.getByLabel('Private room').check(); // Optional for private room test
-
-    // Submit the create room form
-    await page.getByRole('button', { name: 'Create Room' }).click();
-
-    // Verify successful room creation (FR-RM-013)
-    // 1. Modal should close
-    await expect(page.getByRole('heading', { name: 'Create Room' })).not.toBeVisible();
-
-    // 2. Room should appear in sidebar
-    await expect(page.getByRole('button', { name: `# ${roomName}` })).toBeVisible();
-
-    // 3. Active view should switch to new room
-    await expect(page).toHaveURL(/\/chat/); // Still on chat page
-
-    // 4. Verify we're in the correct room (room name should be displayed in chat area)
-    // Note: This depends on the UI showing current room name somewhere visible
-    await expect(page.getByText(`# ${roomName}`)).toBeVisible();
-
-    // 5. Creator should be automatically added as member (verified by presence in room)
-    // This is implicit if we can see the room content/interface
-
-    // Test that the room is properly functional - try to access it by clicking
-    await page.getByRole('button', { name: `# ${roomName}` }).click();
-    await expect(page.getByText(`# ${roomName}`)).toBeVisible();
+    await test.step('Verify the room is accessible by clicking it in the sidebar', async () => {
+      await page.getByRole('button', { name: `# ${roomName}` }).click();
+      await expect(page.getByText(`# ${roomName}`)).toBeVisible({
+        message: 'Room content should be visible after clicking the room in the sidebar',
+      });
+    });
   });
 
   test('Create Room - Duplicate Name Error (FR-RM-002)', async ({ page, testData }) => {
-    // Generate unique user credentials for this test
     const roomCreator = testData.generateTestUser('duproom');
     const duplicateRoomName = `duplicate${TestDbCleanup.generateTestId()}`;
 
-    // Register and login
-    await page.goto('http://localhost:5173/register');
-    await page.getByRole('textbox', { name: 'Username' }).fill(roomCreator.username);
-    await page.getByRole('textbox', { name: 'Email' }).fill(roomCreator.email);
-    await page.getByRole('textbox', { name: 'Password' }).fill(roomCreator.password);
-    await page.getByRole('button', { name: 'Create Account' }).click();
+    await test.step('Register and login a user (prerequisite)', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(roomCreator.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(roomCreator.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(roomCreator.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Registration must succeed before we can test duplicate room name handling',
+      });
+    });
 
-    // Create first room
-    await page.getByTitle('Browse / Create rooms').click();
-    await page.getByText('+ Create Room').click();
-    await page.getByLabel('Room name').fill(duplicateRoomName);
-    await page.getByRole('button', { name: 'Create Room' }).click();
+    await test.step('Create the first room', async () => {
+      await page.getByTitle('Browse / Create rooms').click();
+      await page.getByText('+ Create Room').click();
+      await page.getByLabel('Room name').fill(duplicateRoomName);
+      await page.getByRole('button', { name: 'Create Room' }).click();
+      await expect(page.getByRole('heading', { name: 'Create Room' })).not.toBeVisible({
+        message: 'Modal should close after successful first room creation',
+      });
+      await expect(page.getByRole('button', { name: `# ${duplicateRoomName}` })).toBeVisible({
+        message: 'First room should appear in the sidebar confirming it was created',
+      });
+    });
 
-    // Wait for modal to close (indicates successful creation)
-    await expect(page.getByRole('heading', { name: 'Create Room' })).not.toBeVisible();
+    await test.step('Attempt to create a second room with the same name', async () => {
+      await page.getByTitle('Browse / Create rooms').click();
+      await page.getByText('+ Create Room').click();
+      await page.getByLabel('Room name').fill(duplicateRoomName);
+      await page.getByRole('button', { name: 'Create Room' }).click();
+    });
 
-    // Verify first room was created successfully
-    await expect(page.getByRole('button', { name: `# ${duplicateRoomName}` })).toBeVisible();
-
-    // Try to create second room with same name
-    await page.getByTitle('Browse / Create rooms').click();
-    await page.getByText('+ Create Room').click();
-    await page.getByLabel('Room name').fill(duplicateRoomName);
-    await page.getByRole('button', { name: 'Create Room' }).click();
-
-    // Verify error message appears (FR-RM-002)
-    await expect(page.locator('.auth-error')).toBeVisible();
-    await expect(page.locator('.auth-error')).toHaveText('Room name already taken');
-
-    // Verify modal remains open on error
-    await expect(page.getByRole('heading', { name: 'Create Room' })).toBeVisible(); // Modal title still visible
+    await test.step('Verify duplicate name error is shown and modal stays open (FR-RM-002)', async () => {
+      await expect(page.getByText('Room name already taken')).toBeVisible({
+        message: 'Server should reject duplicate room name with an error message',
+      });
+      await expect(page.getByRole('heading', { name: 'Create Room' })).toBeVisible({
+        message: 'Create Room modal should remain open after a failed submission',
+      });
+    });
   });
 
   test('Create Private Room', async ({ page, testData }) => {
-    // Generate unique user credentials for this test
     const roomCreator = testData.generateTestUser('privateroom');
     const privateRoomName = `private${TestDbCleanup.generateTestId()}`;
 
-    // Register and login
-    await page.goto('http://localhost:5173/register');
-    await page.getByRole('textbox', { name: 'Username' }).fill(roomCreator.username);
-    await page.getByRole('textbox', { name: 'Email' }).fill(roomCreator.email);
-    await page.getByRole('textbox', { name: 'Password' }).fill(roomCreator.password);
-    await page.getByRole('button', { name: 'Create Account' }).click();
+    await test.step('Register and login a user (prerequisite)', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(roomCreator.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(roomCreator.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(roomCreator.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Registration must succeed before we can test private room creation',
+      });
+    });
 
-    // Create private room
-    await page.getByTitle('Browse / Create rooms').click();
-    await page.getByText('+ Create Room').click();
-    await page.getByLabel('Room name').fill(privateRoomName);
-    await page.getByLabel('Private room').check(); // Make it private
-    await page.getByRole('button', { name: 'Create Room' }).click();
+    await test.step('Create a private room', async () => {
+      await page.getByTitle('Browse / Create rooms').click();
+      await page.getByText('+ Create Room').click();
+      await page.getByLabel('Room name').fill(privateRoomName);
+      await page.getByLabel('Private room').check();
+      await page.getByRole('button', { name: 'Create Room' }).click();
+    });
 
-    // Verify private room creation
-    await expect(page.getByRole('button', { name: `# ${privateRoomName}` })).toBeVisible();
-
-    // Private room should appear in creator's sidebar but not be publicly discoverable
-    // (Further testing for privacy would require a second user account)
+    await test.step('Verify private room appears in the creator\'s sidebar', async () => {
+      await expect(page.getByRole('button', { name: `# ${privateRoomName}` })).toBeVisible({
+        message: 'Private room should appear in the creator\'s sidebar after creation',
+      });
+    });
   });
 
   test.skip('Browse public rooms list shows available rooms', async () => {});
