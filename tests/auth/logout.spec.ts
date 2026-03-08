@@ -8,12 +8,12 @@ test.describe('Authentication and Session Management', () => {
     const logoutUser = testData.generateTestUser('logoutuser');
 
     await test.step('Register and login a user (prerequisite)', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(logoutUser.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(logoutUser.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(logoutUser.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Registration should succeed and redirect to /chat before we can test logout',
       });
     });
@@ -32,7 +32,7 @@ test.describe('Authentication and Session Management', () => {
 
     await test.step('Log out', async () => {
       await page.getByRole('button', { name: 'Sign out' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/login', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/login`, {
         message: 'Logout should redirect to /login — session may not have been cleared server-side',
       });
     });
@@ -55,8 +55,8 @@ test.describe('Authentication and Session Management', () => {
     });
 
     await test.step('Verify protected routes are inaccessible after logout', async () => {
-      await page.goto('http://localhost:5173/chat');
-      await expect(page).toHaveURL('http://localhost:5173/login', {
+      await page.goto(`${testData.baseUrl}/chat`);
+      await expect(page).toHaveURL(`${testData.baseUrl}/login`, {
         message: 'Navigating to /chat after logout should redirect to /login — route guard may not be working',
       });
     });
@@ -69,7 +69,7 @@ test.describe('Authentication and Session Management', () => {
         message: 'Username should appear after re-login confirming credentials were not invalidated by logout',
       });
       await expect(page.getByText('Welcome to Chatter')).toBeVisible();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Re-login should redirect to /chat',
       });
     });

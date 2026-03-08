@@ -8,9 +8,9 @@ test.describe('Authentication and Session Management', () => {
     const testUser = testData.generateTestUser('validuser');
 
     await test.step('Navigate to registration page', async () => {
-      await page.goto('http://localhost:5173');
+      await page.goto(`${testData.baseUrl}`);
       await page.getByRole('link', { name: 'Register' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/register', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/register`, {
         message: 'Clicking Register link should navigate to /register',
       });
     });
@@ -23,7 +23,7 @@ test.describe('Authentication and Session Management', () => {
     });
 
     await test.step('Verify redirect to chat after registration', async () => {
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Successful registration should redirect to /chat',
       });
     });

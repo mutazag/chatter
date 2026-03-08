@@ -9,7 +9,7 @@ test.describe('Authentication and Session Management', () => {
     const testUser = testData.generateTestUser('passwordtest');
 
     await test.step('Navigate to registration page', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
     });
 
     await test.step('Submit registration form with a short password', async () => {
@@ -29,7 +29,7 @@ test.describe('Authentication and Session Management', () => {
       await expect(page.getByRole('textbox', { name: 'Email' })).toHaveValue(testUser.email, {
         message: 'Email field should retain its value after validation failure',
       });
-      await expect(page).toHaveURL('http://localhost:5173/register', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/register`, {
         message: 'Client-side validation should prevent form submission — no network request should have been made',
       });
     });
@@ -37,7 +37,7 @@ test.describe('Authentication and Session Management', () => {
     await test.step('Correct the password and resubmit', async () => {
       await page.getByRole('textbox', { name: 'Password' }).fill(testUser.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Registration should succeed after providing a valid password',
       });
     });
@@ -46,7 +46,7 @@ test.describe('Authentication and Session Management', () => {
       await expect(page.getByText(testUser.username)).toBeVisible({
         message: 'Username should appear in the header confirming successful registration',
       });
-      await expect(page).toHaveURL('http://localhost:5173/chat');
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`);
     });
   });
 });

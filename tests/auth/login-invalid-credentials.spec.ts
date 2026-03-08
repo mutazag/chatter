@@ -8,7 +8,7 @@ test.describe('Authentication and Session Management', () => {
     const { nonExistentUser, validEmailWrongPassword } = testData.invalidCredentials;
 
     await test.step('Navigate to login page', async () => {
-      await page.goto('http://localhost:5173/login');
+      await page.goto(`${testData.baseUrl}/login`);
     });
 
     await test.step('Submit login with a non-existent email', async () => {
@@ -24,7 +24,7 @@ test.describe('Authentication and Session Management', () => {
       await expect(page.getByRole('textbox', { name: 'Email' })).toHaveValue(nonExistentUser.email, {
         message: 'Email field should retain its value after failed login',
       });
-      await expect(page).toHaveURL('http://localhost:5173/login', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/login`, {
         message: 'Failed login should not navigate away from /login',
       });
     });
@@ -42,7 +42,7 @@ test.describe('Authentication and Session Management', () => {
       await expect(page.getByRole('textbox', { name: 'Email' })).toHaveValue(validEmailWrongPassword.email, {
         message: 'Email field should retain its value after failed login',
       });
-      await expect(page).toHaveURL('http://localhost:5173/login', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/login`, {
         message: 'Failed login should not navigate away from /login',
       });
       await expect(page.getByRole('button', { name: 'Sign In' })).toBeVisible({

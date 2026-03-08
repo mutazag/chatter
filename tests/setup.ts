@@ -21,6 +21,9 @@ export const test = base.extend({
   // Add a data setup fixture that can handle test data creation/cleanup
   testData: async ({ page }, use) => {
     const testData = {
+      // Base URL for the application under test
+      baseUrl: testDataConfig.baseUrl as string,
+
       // Load test user credentials from config
       testUser: testDataConfig.users.testUser,
       users: testDataConfig.users,

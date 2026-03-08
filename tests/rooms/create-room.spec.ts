@@ -11,12 +11,12 @@ test.describe('Room Management', () => {
     const roomDescription = 'A test room for automated testing purposes';
 
     await test.step('Register and login a user (prerequisite)', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(roomCreator.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(roomCreator.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(roomCreator.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Registration must succeed before we can test room creation',
       });
     });
@@ -66,12 +66,12 @@ test.describe('Room Management', () => {
     const duplicateRoomName = `duplicate${TestDbCleanup.generateTestId()}`;
 
     await test.step('Register and login a user (prerequisite)', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(roomCreator.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(roomCreator.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(roomCreator.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Registration must succeed before we can test duplicate room name handling',
       });
     });
@@ -111,12 +111,12 @@ test.describe('Room Management', () => {
     const privateRoomName = `private${TestDbCleanup.generateTestId()}`;
 
     await test.step('Register and login a user (prerequisite)', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(roomCreator.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(roomCreator.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(roomCreator.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Registration must succeed before we can test private room creation',
       });
     });
@@ -143,12 +143,12 @@ test.describe('Room Management', () => {
     const publicRoomDesc = 'A room for browsing tests';
 
     await test.step('Register owner and create a public room (prerequisite)', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(owner.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(owner.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(owner.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Owner registration must succeed before creating a room',
       });
       await page.getByTitle('Browse / Create rooms').click();
@@ -160,18 +160,18 @@ test.describe('Room Management', () => {
         message: 'Room creation must complete before switching to the browsing user',
       });
       await page.getByRole('button', { name: 'Sign out' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/login', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/login`, {
         message: 'Owner must be signed out before registering the browsing user',
       });
     });
 
     await test.step('Register a second user', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(browser.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(browser.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(browser.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Second user registration must succeed before testing the browse list',
       });
     });
@@ -206,12 +206,12 @@ test.describe('Room Management', () => {
     const publicRoomName = `joinroom${TestDbCleanup.generateTestId()}`;
 
     await test.step('Register owner and create a public room (prerequisite)', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(owner.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(owner.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(owner.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Owner registration must succeed before creating the room to join',
       });
       await page.getByTitle('Browse / Create rooms').click();
@@ -222,18 +222,18 @@ test.describe('Room Management', () => {
         message: 'Room creation must complete before switching to the joining user',
       });
       await page.getByRole('button', { name: 'Sign out' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/login', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/login`, {
         message: 'Owner must be signed out before registering the joining user',
       });
     });
 
     await test.step('Register the joining user', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(joiner.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(joiner.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(joiner.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Joining user registration must succeed before testing join functionality',
       });
     });
@@ -274,12 +274,12 @@ test.describe('Room Management', () => {
     const privateRoomName = `private${TestDbCleanup.generateTestId()}`;
 
     await test.step('Register owner and create a private room (prerequisite)', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(owner.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(owner.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(owner.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Owner registration must succeed before creating the private room',
       });
       await page.getByTitle('Browse / Create rooms').click();
@@ -291,18 +291,18 @@ test.describe('Room Management', () => {
         message: 'Private room must be created before testing visibility for non-members',
       });
       await page.getByRole('button', { name: 'Sign out' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/login', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/login`, {
         message: 'Owner must be signed out before registering the non-member user',
       });
     });
 
     await test.step('Register a non-member user', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(nonMember.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(nonMember.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(nonMember.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Non-member registration must succeed before testing browse list visibility',
       });
     });

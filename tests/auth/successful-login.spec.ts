@@ -8,19 +8,19 @@ test.describe('Authentication and Session Management', () => {
     const loginUser = testData.generateTestUser('loginuser');
 
     await test.step('Register a user account (prerequisite)', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(loginUser.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(loginUser.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(loginUser.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Registration should succeed and redirect to /chat before we can test login',
       });
     });
 
     await test.step('Sign out to prepare for login test', async () => {
       await page.getByRole('button', { name: 'Sign out' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/login', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/login`, {
         message: 'Sign out should redirect to /login',
       });
     });
@@ -32,7 +32,7 @@ test.describe('Authentication and Session Management', () => {
     });
 
     await test.step('Verify redirect to chat after login', async () => {
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'Successful login should redirect to /chat',
       });
     });

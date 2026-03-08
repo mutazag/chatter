@@ -9,19 +9,19 @@ test.describe('Authentication and Session Management', () => {
     const testUser = testData.generateTestUser('firstuser');
 
     await test.step('Register first user with a specific email (prerequisite)', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       await page.getByRole('textbox', { name: 'Username' }).fill(testUser.username);
       await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
       await page.getByRole('textbox', { name: 'Password' }).fill(testUser.password);
       await page.getByRole('button', { name: 'Create Account' }).click();
-      await expect(page).toHaveURL('http://localhost:5173/chat', {
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
         message: 'First registration should succeed before we can test duplicate email rejection',
       });
       await page.getByRole('button', { name: 'Sign out' }).click();
     });
 
     await test.step('Attempt to register a second user with the same email', async () => {
-      await page.goto('http://localhost:5173/register');
+      await page.goto(`${testData.baseUrl}/register`);
       const anotherUsername = testData.generateTestUsername('anotheruser');
       await page.getByRole('textbox', { name: 'Username' }).fill(anotherUsername);
       await page.getByRole('textbox', { name: 'Email' }).fill(testUser.email);
@@ -47,7 +47,7 @@ test.describe('Authentication and Session Management', () => {
       });
 
       await test.step('Verify no navigation occurred', async () => {
-        await expect(page).toHaveURL('http://localhost:5173/register', {
+        await expect(page).toHaveURL(`${testData.baseUrl}/register`, {
           message: 'Failed registration should not navigate away from /register',
         });
       });
