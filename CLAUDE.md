@@ -16,3 +16,7 @@ All Playwright tests must follow the practices documented in [`tests/README.md`]
 - A test is removed or renamed
 
 Update both the summary table at the top and the matching row in the detail section.
+
+## Cleanup Script
+
+When a new test adds a `generateTestUser('newprefix')` or `generateTestUsername('newprefix')` call, add `'newprefix'` to the `ALL_TEST_PREFIXES` array in `tests/utils/cleanup-orphans.ts`.

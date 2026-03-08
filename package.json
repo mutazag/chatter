@@ -16,7 +16,8 @@
     "test:debug": "playwright test --debug",
     "test:report": "playwright show-report",
     "test:list": "playwright test --list",
-    "test:install": "playwright install"
+    "test:install": "playwright install",
+    "test:cleanup": "tsx tests/utils/cleanup-orphans.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",

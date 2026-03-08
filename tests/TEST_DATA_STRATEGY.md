@@ -110,13 +110,19 @@ For sequential tests within the same worker, each test's data is isolated becaus
 
 ## Ad-hoc Cleanup
 
-If a test run was aborted before cleanup ran, leftover data can be removed by pattern:
+If a test run was aborted before cleanup ran, orphaned data can be removed using the cleanup script:
 
-```typescript
-await TestDbCleanup.cleanupByPattern('loginuser');
-// Deletes all users whose username or email contains 'loginuser',
-// plus their messages, DMs, memberships, images, and rooms.
+```bash
+# Clean up all known test prefixes
+npm run test:cleanup
+
+# Clean up a specific prefix only
+npm run test:cleanup -- loginuser
 ```
+
+The script lives at `tests/utils/cleanup-orphans.ts` and maintains a list of all prefixes used by `generateTestUser()` across the test suite. It calls `TestDbCleanup.cleanupByPattern()` for each prefix, which deletes all users whose username or email contains the pattern, plus their messages, DMs, memberships, images, and rooms.
+
+**Keep `ALL_TEST_PREFIXES` in sync** — whenever a new test adds a `generateTestUser('newprefix')` call, add `'newprefix'` to the array in `cleanup-orphans.ts`.
 
 ---
 
