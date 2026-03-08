@@ -131,4 +131,10 @@ test.describe('Room Management', () => {
     // Private room should appear in creator's sidebar but not be publicly discoverable
     // (Further testing for privacy would require a second user account)
   });
+
+  test.skip('Browse public rooms list shows available rooms', async () => {});
+  test.skip('Join a public room from the browse list', async () => {});
+  test.skip('Leave a room removes it from sidebar', async () => {});
+  test.skip('Private room is not visible in public browse list', async () => {});
+  test.skip('Room member list shows all joined members', async () => {});
 });
