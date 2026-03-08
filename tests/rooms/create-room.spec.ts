@@ -23,7 +23,7 @@ test.describe('Room Management', () => {
 
     await test.step('Open the room creation modal (FR-RM-012)', async () => {
       await page.getByTitle('Browse / Create rooms').click();
-      await expect(page.getByRole('heading', { name: 'Rooms' })).toBeVisible({
+      await expect(page.getByRole('heading', { name: 'Rooms', exact: true })).toBeVisible({
         message: 'Rooms modal should open after clicking the browse/create button',
       });
       await page.getByText('+ Create Room').click();
@@ -136,9 +136,189 @@ test.describe('Room Management', () => {
     });
   });
 
-  test.skip('Browse public rooms list shows available rooms', async () => {});
-  test.skip('Join a public room from the browse list', async () => {});
+  test('Browse public rooms list shows available rooms', async ({ page, testData }) => {
+    const owner = testData.generateTestUser('browseowner');
+    const browser = testData.generateTestUser('browsereader');
+    const publicRoomName = `public${TestDbCleanup.generateTestId()}`;
+    const publicRoomDesc = 'A room for browsing tests';
+
+    await test.step('Register owner and create a public room (prerequisite)', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(owner.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(owner.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(owner.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Owner registration must succeed before creating a room',
+      });
+      await page.getByTitle('Browse / Create rooms').click();
+      await page.getByText('+ Create Room').click();
+      await page.getByLabel('Room name').fill(publicRoomName);
+      await page.getByLabel('Description (optional)').fill(publicRoomDesc);
+      await page.getByRole('button', { name: 'Create Room' }).click();
+      await expect(page.getByRole('heading', { name: 'Create Room' })).not.toBeVisible({
+        message: 'Room creation must complete before switching to the browsing user',
+      });
+      await page.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/login', {
+        message: 'Owner must be signed out before registering the browsing user',
+      });
+    });
+
+    await test.step('Register a second user', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(browser.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(browser.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(browser.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Second user registration must succeed before testing the browse list',
+      });
+    });
+
+    await test.step('Open the browse rooms list', async () => {
+      await page.getByTitle('Browse / Create rooms').click();
+      await expect(page.getByRole('heading', { name: 'Rooms', exact: true })).toBeVisible({
+        message: 'Rooms modal should open',
+      });
+      await expect(page.getByRole('heading', { name: 'Browse Rooms' })).toBeVisible({
+        message: '"Browse Rooms" section should be visible in the modal',
+      });
+    });
+
+    await test.step('Verify the public room appears in the list with correct details', async () => {
+      const roomRow = page.locator('.room-browser-item').filter({ hasText: publicRoomName });
+      await expect(roomRow.getByText(`# ${publicRoomName}`)).toBeVisible({
+        message: 'Public room created by another user should appear in the browse list',
+      });
+      await expect(roomRow.getByText(publicRoomDesc)).toBeVisible({
+        message: 'Room description should be shown in the browse list',
+      });
+      await expect(roomRow.getByRole('button', { name: 'Join' })).toBeVisible({
+        message: 'Each browsable room should show a Join button',
+      });
+    });
+  });
+
+  test('Join a public room from the browse list', async ({ page, testData }) => {
+    const owner = testData.generateTestUser('joinowner');
+    const joiner = testData.generateTestUser('joinuser');
+    const publicRoomName = `joinroom${TestDbCleanup.generateTestId()}`;
+
+    await test.step('Register owner and create a public room (prerequisite)', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(owner.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(owner.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(owner.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Owner registration must succeed before creating the room to join',
+      });
+      await page.getByTitle('Browse / Create rooms').click();
+      await page.getByText('+ Create Room').click();
+      await page.getByLabel('Room name').fill(publicRoomName);
+      await page.getByRole('button', { name: 'Create Room' }).click();
+      await expect(page.getByRole('heading', { name: 'Create Room' })).not.toBeVisible({
+        message: 'Room creation must complete before switching to the joining user',
+      });
+      await page.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/login', {
+        message: 'Owner must be signed out before registering the joining user',
+      });
+    });
+
+    await test.step('Register the joining user', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(joiner.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(joiner.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(joiner.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Joining user registration must succeed before testing join functionality',
+      });
+    });
+
+    await test.step('Open the browse list and join the public room', async () => {
+      await page.getByTitle('Browse / Create rooms').click();
+      const roomRow = page.locator('.room-browser-item').filter({ hasText: publicRoomName });
+      await expect(roomRow.getByText(`# ${publicRoomName}`)).toBeVisible({
+        message: 'The public room must appear in the browse list before joining',
+      });
+      await roomRow.getByRole('button', { name: 'Join' }).click();
+    });
+
+    await test.step('Verify the room was joined and is now active', async () => {
+      await expect(page.getByRole('button', { name: `# ${publicRoomName}` })).toBeVisible({
+        message: 'Joined room should appear in the sidebar',
+      });
+      await expect(page.getByText(`# ${publicRoomName}`)).toBeVisible({
+        message: 'Active view should switch to the joined room',
+      });
+    });
+
+    await test.step('Verify the room no longer appears in the browse list', async () => {
+      // The modal remains open after joining — check the browse list directly without reopening
+      await expect(page.locator('.room-browser-item').filter({ hasText: publicRoomName })).not.toBeVisible({
+        message: 'Already-joined rooms should be removed from the browse list',
+      });
+    });
+  });
+
+  // Blocked: no "Leave room" button exists in the UI yet.
+  // The leaveRoom() API function exists in useRooms.ts but is not wired to any UI element.
   test.skip('Leave a room removes it from sidebar', async () => {});
-  test.skip('Private room is not visible in public browse list', async () => {});
+
+  test('Private room is not visible in public browse list', async ({ page, testData }) => {
+    const owner = testData.generateTestUser('privateowner');
+    const nonMember = testData.generateTestUser('nonmember');
+    const privateRoomName = `private${TestDbCleanup.generateTestId()}`;
+
+    await test.step('Register owner and create a private room (prerequisite)', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(owner.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(owner.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(owner.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Owner registration must succeed before creating the private room',
+      });
+      await page.getByTitle('Browse / Create rooms').click();
+      await page.getByText('+ Create Room').click();
+      await page.getByLabel('Room name').fill(privateRoomName);
+      await page.getByLabel('Private room').check();
+      await page.getByRole('button', { name: 'Create Room' }).click();
+      await expect(page.getByRole('button', { name: `# ${privateRoomName}` })).toBeVisible({
+        message: 'Private room must be created before testing visibility for non-members',
+      });
+      await page.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/login', {
+        message: 'Owner must be signed out before registering the non-member user',
+      });
+    });
+
+    await test.step('Register a non-member user', async () => {
+      await page.goto('http://localhost:5173/register');
+      await page.getByRole('textbox', { name: 'Username' }).fill(nonMember.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(nonMember.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(nonMember.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL('http://localhost:5173/chat', {
+        message: 'Non-member registration must succeed before testing browse list visibility',
+      });
+    });
+
+    await test.step('Open the browse list and verify the private room is not shown', async () => {
+      await page.getByTitle('Browse / Create rooms').click();
+      await expect(page.getByRole('heading', { name: 'Browse Rooms' })).toBeVisible({
+        message: 'Browse Rooms section should be visible',
+      });
+      await expect(page.getByText(`# ${privateRoomName}`)).not.toBeVisible({
+        message: 'Private rooms must not appear in the public browse list for non-members',
+      });
+    });
+  });
+
+  // Blocked: no room member list UI exists yet.
+  // There is no API endpoint (GET /rooms/:id/members) and no frontend component to display members.
   test.skip('Room member list shows all joined members', async () => {});
 });
