@@ -30,6 +30,9 @@ const ALL_TEST_PREFIXES = [
   'joinuser',
   'privateowner',
   'nonmember',
+  'leaveroom',
+  'membersowner',
+  'membersjoiner',
 ];
 
 async function run() {

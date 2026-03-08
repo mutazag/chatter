@@ -36,7 +36,8 @@
       "mcp__Neon__get_doc_resource",
       "Bash(npx playwright:*)",
       "Bash(npm test:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "WebSearch"
     ]
   }
 }

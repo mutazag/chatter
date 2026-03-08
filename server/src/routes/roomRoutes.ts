@@ -11,6 +11,7 @@ router.get('/mine', roomController.listMyRooms);
 router.post('/', roomController.createRoom);
 router.post('/:id/join', roomController.joinRoom);
 router.delete('/:id/leave', roomController.leaveRoom);
+router.get('/:id/members', roomController.getRoomMembers);
 router.get('/:id/messages', roomController.getRoomMessages);
 
 export default router;

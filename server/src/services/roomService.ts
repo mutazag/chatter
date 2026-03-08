@@ -89,6 +89,15 @@ export async function getUserRooms(userId: string) {
   return memberships.map((m) => m.room);
 }
 
+export async function getRoomMembers(roomId: string) {
+  const memberships = await prisma.roomMembership.findMany({
+    where: { roomId },
+    include: { user: { select: { id: true, username: true, avatarUrl: true } } },
+    orderBy: { joinedAt: 'asc' },
+  });
+  return memberships.map((m) => ({ ...m.user, joinedAt: m.joinedAt }));
+}
+
 export async function isRoomMember(userId: string, roomId: string): Promise<boolean> {
   const m = await prisma.roomMembership.findUnique({
     where: { userId_roomId: { userId, roomId } },

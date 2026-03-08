@@ -30,6 +30,18 @@ export async function leaveRoom(roomId: string): Promise<void> {
   await api.delete(`/rooms/${roomId}/leave`);
 }
 
+export interface RoomMember {
+  id: string;
+  username: string;
+  avatarUrl: string | null;
+  joinedAt: string;
+}
+
+export async function getRoomMembers(roomId: string): Promise<RoomMember[]> {
+  const { data } = await api.get<{ members: RoomMember[] }>(`/rooms/${roomId}/members`);
+  return data.members;
+}
+
 export async function getRoomMessages(
   roomId: string,
   before?: string,

@@ -314,6 +314,51 @@ The same username always produces the same colour across sessions and users.
 
 ---
 
+## UI Patterns
+
+### Avatar + username rows
+
+Any list that shows users (DM sidebar, room members modal) must use the same visual row structure:
+
+```tsx
+<div className="dm-item">
+  <Avatar username={u.username} avatarUrl={u.avatarUrl} size={28} />
+  <span className="dm-item-name">{u.username}</span>
+</div>
+```
+
+| Part | Requirement |
+|---|---|
+| `Avatar` | Always use the shared `Avatar` component (`client/src/components/shared/Avatar.tsx`). Never render raw `<img>` or initials-only text. |
+| `size` | Sidebar conversations: `36` (default). Compact lists (e.g. members modal): `28`. |
+| `.dm-item` | Flex row with `gap`, padding, hover state — defined in `index.css`. Reuse this class; do not create per-feature equivalents. |
+| `.dm-item-name` | Truncates with `text-overflow: ellipsis`. Always wrap the username text in this class. |
+
+---
+
+### Chat header — responsive action buttons
+
+The chat header (`ChatWindow`) places the room name on the left and action buttons (Members, Leave) on the far right using `margin-left: auto` on `.chat-header-actions`.
+
+**Collapse behaviour:** when the header's own width falls below `340px`, the individual action buttons are hidden and replaced by a circular `···` overflow menu button. This uses a **CSS container query** on `.chat-header` (not a viewport media query), so it responds to the actual available space rather than window width:
+
+```css
+.chat-header { container-type: inline-size; }
+
+@container (max-width: 340px) {
+  .chat-header-btn     { display: none !important; }
+  .chat-header-overflow { display: block; }
+}
+```
+
+**Implementation rules:**
+- Every button added to the chat header must have `className="chat-header-btn"` so it participates in the collapse.
+- The same action must also appear as an entry inside `.chat-header-overflow-dropdown`.
+- The overflow dropdown dismisses on outside click via a `mousedown` listener attached/removed with `useEffect` (only while `showOverflow` is true).
+- Use an SVG icon for the trigger, not Unicode characters, to ensure consistent weight and alignment across platforms.
+
+---
+
 ## Build and Dev
 
 | Command | Description |

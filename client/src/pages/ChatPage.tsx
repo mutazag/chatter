@@ -6,6 +6,7 @@ import { useRooms } from '../hooks/useRooms';
 
 export function ChatPage() {
   const activeView = useChatStore((s) => s.activeView);
+  const setActiveView = useChatStore((s) => s.setActiveView);
   const { rooms } = useRooms();
 
   const renderContent = () => {
@@ -24,6 +25,7 @@ export function ChatPage() {
         <ChatWindow
           roomId={activeView.roomId}
           roomName={room?.name ?? activeView.roomId}
+          onLeave={() => setActiveView(null)}
         />
       );
     }

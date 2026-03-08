@@ -264,9 +264,48 @@ test.describe('Room Management', () => {
     });
   });
 
-  // Blocked: no "Leave room" button exists in the UI yet.
-  // The leaveRoom() API function exists in useRooms.ts but is not wired to any UI element.
-  test.skip('Leave a room removes it from sidebar', async () => {});
+  test('Leave a room removes it from sidebar', async ({ page, testData }) => {
+    const leaver = testData.generateTestUser('leaveroom');
+    const roomName = `leavetest${TestDbCleanup.generateTestId()}`;
+
+    await test.step('Register and login (prerequisite)', async () => {
+      await page.goto(`${testData.baseUrl}/register`);
+      await page.getByRole('textbox', { name: 'Username' }).fill(leaver.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(leaver.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(leaver.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
+        message: 'Registration must succeed before testing leave room',
+      });
+    });
+
+    await test.step('Create a room (prerequisite)', async () => {
+      await page.getByTitle('Browse / Create rooms').click();
+      await page.getByText('+ Create Room').click();
+      await page.getByLabel('Room name').fill(roomName);
+      await page.getByRole('button', { name: 'Create Room' }).click();
+      await expect(page.getByRole('button', { name: `# ${roomName}` })).toBeVisible({
+        message: 'Room must appear in sidebar before testing leave',
+      });
+    });
+
+    await test.step('Click the Leave button in the chat header', async () => {
+      await page.getByRole('button', { name: `# ${roomName}` }).click();
+      await expect(page.getByText(`# ${roomName}`)).toBeVisible({
+        message: 'Room chat must be active before leaving',
+      });
+      await page.getByRole('button', { name: 'Leave', exact: true }).click();
+    });
+
+    await test.step('Verify room is removed from the sidebar and active view resets', async () => {
+      await expect(page.getByRole('button', { name: `# ${roomName}` })).not.toBeVisible({
+        message: 'Room should be removed from the sidebar after leaving',
+      });
+      await expect(page.getByText(`# ${roomName}`)).not.toBeVisible({
+        message: 'Active view should no longer show the left room',
+      });
+    });
+  });
 
   test('Private room is not visible in public browse list', async ({ page, testData }) => {
     const owner = testData.generateTestUser('privateowner');
@@ -318,7 +357,64 @@ test.describe('Room Management', () => {
     });
   });
 
-  // Blocked: no room member list UI exists yet.
-  // There is no API endpoint (GET /rooms/:id/members) and no frontend component to display members.
-  test.skip('Room member list shows all joined members', async () => {});
+  test('Room member list shows all joined members', async ({ page, testData }) => {
+    const owner = testData.generateTestUser('membersowner');
+    const joiner = testData.generateTestUser('membersjoiner');
+    const roomName = `memberstest${TestDbCleanup.generateTestId()}`;
+
+    await test.step('Register owner and create a public room (prerequisite)', async () => {
+      await page.goto(`${testData.baseUrl}/register`);
+      await page.getByRole('textbox', { name: 'Username' }).fill(owner.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(owner.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(owner.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
+        message: 'Owner registration must succeed before creating the room',
+      });
+      await page.getByTitle('Browse / Create rooms').click();
+      await page.getByText('+ Create Room').click();
+      await page.getByLabel('Room name').fill(roomName);
+      await page.getByRole('button', { name: 'Create Room' }).click();
+      await expect(page.getByRole('button', { name: `# ${roomName}` })).toBeVisible({
+        message: 'Room must be created before the second user joins',
+      });
+      await page.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL(`${testData.baseUrl}/login`, {
+        message: 'Owner must be signed out before registering the second user',
+      });
+    });
+
+    await test.step('Register second user and join the room (prerequisite)', async () => {
+      await page.goto(`${testData.baseUrl}/register`);
+      await page.getByRole('textbox', { name: 'Username' }).fill(joiner.username);
+      await page.getByRole('textbox', { name: 'Email' }).fill(joiner.email);
+      await page.getByRole('textbox', { name: 'Password' }).fill(joiner.password);
+      await page.getByRole('button', { name: 'Create Account' }).click();
+      await expect(page).toHaveURL(`${testData.baseUrl}/chat`, {
+        message: 'Second user registration must succeed before joining the room',
+      });
+      await page.getByTitle('Browse / Create rooms').click();
+      const roomRow = page.locator('.room-browser-item').filter({ hasText: roomName });
+      await roomRow.getByRole('button', { name: 'Join' }).click();
+      await expect(page.getByRole('button', { name: `# ${roomName}` })).toBeVisible({
+        message: 'Second user must join the room before testing the member list',
+      });
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('heading', { name: 'Rooms', exact: true })).not.toBeVisible({
+        message: 'Rooms modal must be closed before interacting with the sidebar',
+      });
+    });
+
+    await test.step('Open the Members modal and verify both members are shown', async () => {
+      await page.getByRole('button', { name: `# ${roomName}` }).click();
+      await page.getByRole('button', { name: 'Members', exact: true }).click();
+      const membersList = page.locator('.modal-body');
+      await expect(membersList.getByText(owner.username)).toBeVisible({
+        message: 'Room owner should appear in the member list',
+      });
+      await expect(membersList.getByText(joiner.username)).toBeVisible({
+        message: 'Second user who joined should also appear in the member list',
+      });
+    });
+  });
 });

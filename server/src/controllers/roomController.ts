@@ -54,6 +54,12 @@ export async function joinRoom(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function getRoomMembers(req: Request, res: Response): Promise<void> {
+  const id = req.params['id'] as string;
+  const members = await roomService.getRoomMembers(id);
+  res.json({ members });
+}
+
 export async function leaveRoom(req: Request, res: Response): Promise<void> {
   const id = req.params['id'] as string;
   await roomService.leaveRoom(req.user!.id, id);

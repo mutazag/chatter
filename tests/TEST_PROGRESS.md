@@ -1,18 +1,18 @@
 # Test Implementation Progress
 
-**Last updated:** 2026-03-08
+**Last updated:** 2026-03-09
 **Suite total:** 57 tests across 7 areas (excludes infra tests: seed, test-data-validation)
 
 | Area | Implemented | Total | Progress |
 |---|---|---|---|
 | Authentication | 6 | 6 | 100% |
-| Room Management | 6 | 8 | 75% |
+| Room Management | 8 | 8 | 100% |
 | Core Messaging | 0 | 9 | 0% |
 | Direct Messaging | 0 | 8 | 0% |
 | Real-time Features | 0 | 8 | 0% |
 | Image Sharing | 0 | 9 | 0% |
 | UI/UX | 0 | 9 | 0% |
-| **Total** | **12** | **57** | **21%** |
+| **Total** | **14** | **57** | **25%** |
 
 ---
 
@@ -28,7 +28,7 @@
 | Registration with Duplicate Email | ✅ passing |
 | Registration Password Length Validation | ✅ passing |
 
-### Room Management — 6/8
+### Room Management — 8/8 ✅
 | Test | Status |
 |---|---|
 | Create Room | ✅ passing |
@@ -37,8 +37,8 @@
 | Browse public rooms list shows available rooms | ✅ passing |
 | Join a public room from the browse list | ✅ passing |
 | Private room is not visible in public browse list | ✅ passing |
-| Leave a room removes it from sidebar | ⛔ blocked — no Leave button in UI (`leaveRoom()` API exists but unused) |
-| Room member list shows all joined members | ⛔ blocked — no member list API or UI component |
+| Leave a room removes it from sidebar | ✅ passing |
+| Room member list shows all joined members | ✅ passing |
 
 ### Core Messaging — 0/9
 | Test | Status |

@@ -90,12 +90,45 @@ body {
 /* Chat window */
 .chat-window { display: flex; flex-direction: column; height: 100%; }
 .chat-header {
+  container-type: inline-size;
   padding: 10px 16px;
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 8px;
   flex-shrink: 0;
 }
-.chat-room-name { font-weight: 600; font-size: 15px; }
+.chat-room-name { font-weight: 600; font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
+
+/* Overflow "···" menu — hidden by default, shown when header is narrow */
+.chat-header-overflow { position: relative; display: none; }
+.chat-header-overflow-trigger {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+  padding: 0; line-height: 1;
+}
+.chat-header-overflow-trigger svg { display: block; }
+.chat-header-overflow-trigger:hover { background: var(--hover); }
+.chat-header-overflow-dropdown {
+  position: absolute; right: 0; top: calc(100% + 6px);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  min-width: 140px; z-index: 100; overflow: hidden;
+}
+.chat-header-overflow-dropdown button {
+  display: block; width: 100%; text-align: left;
+  padding: 10px 14px; background: none; border: none;
+  color: var(--text); font-size: 14px; cursor: pointer;
+}
+.chat-header-overflow-dropdown button:hover { background: var(--hover); }
+.chat-header-overflow-dropdown button.danger { color: var(--danger, #e05252); }
+
+@container (max-width: 340px) {
+  .chat-header-btn { display: none !important; }
+  .chat-header-overflow { display: block; }
+}
 .chat-messages {
   flex: 1; overflow-y: auto; padding: 16px;
   display: flex; flex-direction: column; gap: 4px;

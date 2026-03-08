@@ -82,6 +82,7 @@ export default defineConfig({
       command: 'npm run dev --workspace=server',
       port: 3000,
       reuseExistingServer: !process.env.CI,
+      env: { NODE_ENV: 'test' },
     },
     {
       command: 'npm run dev --workspace=client',
