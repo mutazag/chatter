@@ -82,19 +82,21 @@ jobs:
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             echo "value=pr-${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
           else
-            echo "value=latest" >> $GITHUB_OUTPUT
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+            echo "value=sha-${SHORT_SHA}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Set up Docker Buildx        # <-- ADD THIS STEP
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}
+            ${{ github.event_name == 'push' && format('{0}/{1}:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -118,7 +120,7 @@ jobs:
         with:
           containerAppName: chatter-prod
           resourceGroup: chatter-rg
-          imageToDeploy: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          imageToDeploy: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.image-tag }}
           registryServer: ${{ env.REGISTRY }}
           registryUsername: ${{ github.actor }}
           registryPassword: ${{ secrets.GITHUB_TOKEN }}
