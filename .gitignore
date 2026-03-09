@@ -14,5 +14,4 @@ server/uploads/
 /playwright/.cache/
 
 # Test data (sensitive credentials)
-tests/test-data.json
 .playwright-mcp/page-*.png
