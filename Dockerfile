@@ -28,9 +28,10 @@ WORKDIR /app
 # Copy server build output
 COPY --from=builder /app/server/dist ./dist
 
-# Copy server production dependencies only
-COPY --from=builder /app/server/package*.json ./
-RUN npm ci --omit=dev
+# Copy root package files (lock file lives at root in a monorepo)
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/server/package*.json ./server/
+RUN npm ci --omit=dev --workspace=server
 
 # Copy Prisma schema and generated client
 COPY --from=builder /app/server/prisma ./prisma
