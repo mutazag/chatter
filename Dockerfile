@@ -30,11 +30,14 @@ COPY --from=builder /app/server/dist ./dist
 
 # Copy server production dependencies only
 COPY --from=builder /app/server/package*.json ./
+# Skip Prisma client generation during postinstall (we copy the pre-built client below)
+ENV PRISMA_SKIP_GENERATE=1
 RUN npm ci --omit=dev
 
 # Copy Prisma schema and generated client
+# Note: In npm workspaces, Prisma generates the client at the workspace root node_modules/.prisma
 COPY --from=builder /app/server/prisma ./prisma
-COPY --from=builder /app/server/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Copy React build as static assets served by Express
 COPY --from=builder /app/client/dist ./public
