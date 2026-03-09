@@ -85,6 +85,10 @@ jobs:
             echo "value=latest" >> $GITHUB_OUTPUT
           fi
 
+      - name: Set up Docker Buildx        # <-- ADD THIS STEP
+        uses: docker/setup-buildx-action@v3
+
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
