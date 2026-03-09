@@ -88,6 +88,7 @@ graph TD
 | Tier | Technology | What it holds |
 |---|---|---|
 | **Global client state** | Zustand (`chatStore`) | Rooms, messages, conversations, typing, loading flags, active view |
+| **UI preferences** | Zustand (`uiStore`) | Theme (dark/light) and sidebar open/collapsed state |
 | **Auth + Socket lifecycle** | React Context | The authenticated user object and the Socket.IO instance |
 
 Zustand was chosen over Context for chat state because selectors (`useChatStore(s => s.rooms)`) prevent unnecessary re-renders — only components subscribed to a particular slice re-render when that slice changes. See [ADR-004](./adr/004-zustand-state-management.md).
@@ -116,6 +117,17 @@ dmMessages: Record<string, DirectMessage[]>
 roomTyping: Record<string, TypingUser[]>
 dmTyping:   Record<string, boolean>
 ```
+
+### `uiStore`
+
+```ts
+theme:          'dark' | 'light'   // persisted to localStorage as 'chatter-theme'
+sidebarOpen:    boolean             // true = visible, false = collapsed (width: 0)
+toggleTheme()                       // flips theme, writes data-theme attr on <html>
+toggleSidebar()                     // flips sidebarOpen
+```
+
+Theme is applied to `document.documentElement` before first render (module-level call) to prevent a flash of wrong theme. Initial value comes from `localStorage`; falls back to `prefers-color-scheme`.
 
 ### `AuthContext`
 
@@ -255,26 +267,69 @@ See [ADR-008](./adr/008-image-message-encoding.md) for the rationale.
 
 ## Styling
 
-All styles live in a single `src/index.css` file using plain CSS custom properties (no CSS-in-JS, no Tailwind). The design tokens are:
+All styles live in a single `src/index.css` file using plain CSS custom properties (no CSS-in-JS, no Tailwind).
+
+### Typography
+
+Two Google Fonts are loaded via `@import`:
+
+| Font | Use |
+|---|---|
+| `Plus Jakarta Sans` (400/500/600/700) | All UI text — body, labels, inputs, buttons |
+| `Syne` (700) | Brand name "Chatter", auth page title, 404 heading only |
+
+Never use Inter, Roboto, Arial, or system fonts for new UI elements.
+
+### Design tokens — dark mode (default)
 
 ```css
 :root {
-  --bg:            #0f0f0f;   /* page background */
-  --surface:       #1a1a1a;   /* card / panel */
-  --surface2:      #252525;   /* input backgrounds, other-user bubbles */
-  --surface3:      #2e2e2e;   /* hover states */
-  --border:        #333;
-  --text:          #e8e8e8;
-  --text-muted:    #888;
-  --primary:       #6366f1;   /* brand indigo */
-  --primary-hover: #4f52e0;
-  --danger:        #ef4444;
-  --sidebar-w:     240px;
-  --header-h:      52px;
+  --bg:               #0b0c15;   /* deep navy-black page background */
+  --surface:          #13141f;   /* header, sidebar, modals */
+  --surface2:         #1c1d2e;   /* inputs, other-user bubbles */
+  --surface3:         #252638;   /* hover states */
+  --border:           #2d2e47;   /* violet-tinted borders */
+  --text:             #eeeef4;
+  --text-muted:       #6b6c8c;   /* lavender-grey */
+  --primary:          #7c6af6;   /* brand violet */
+  --primary-hover:    #6a58e8;
+  --primary-glow:     rgba(124, 106, 246, 0.18);  /* focus ring */
+  --primary-gradient: linear-gradient(135deg, #7c6af6 0%, #a78bfa 100%);
+  --danger:           #f87171;
+  --sidebar-w:        252px;
+  --header-h:         56px;
+  --radius:           10px;
 }
 ```
 
-The shimmer animation for skeleton loaders:
+### Light mode overrides
+
+Applied via `[data-theme="light"]` on `<html>`. Only surface/border/text tokens change; primary, gradient, and danger are identical in both modes.
+
+```css
+:root[data-theme="light"] {
+  --bg:           #eeeef6;
+  --surface:      #ffffff;
+  --surface2:     #f4f4fb;
+  --surface3:     #e8e8f2;
+  --border:       #d8d8ea;
+  --text:         #1a1a2e;
+  --text-muted:   #7878a0;
+  --primary-glow: rgba(124, 106, 246, 0.14);
+}
+```
+
+Own message bubbles use a softer lavender tint in light mode (deep gradient is too heavy against a light background):
+
+```css
+[data-theme="light"] .message-own .message-bubble {
+  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+  border: 1px solid #c4b5fd;
+  color: #3b0764;
+}
+```
+
+### Shimmer animation (skeleton loaders)
 
 ```css
 @keyframes shimmer {
@@ -282,12 +337,7 @@ The shimmer animation for skeleton loaders:
   100% { background-position:  200% 0; }
 }
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--surface2) 25%,
-    var(--surface3) 50%,
-    var(--surface2) 75%
-  );
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
@@ -356,6 +406,38 @@ The chat header (`ChatWindow`) places the room name on the left and action butto
 - The same action must also appear as an entry inside `.chat-header-overflow-dropdown`.
 - The overflow dropdown dismisses on outside click via a `mousedown` listener attached/removed with `useEffect` (only while `showOverflow` is true).
 - Use an SVG icon for the trigger, not Unicode characters, to ensure consistent weight and alignment across platforms.
+
+### Theme toggle and sidebar toggle (Header)
+
+Both controls live in `Header.tsx` and read/write `uiStore`.
+
+| Control | Position | Icon |
+|---|---|---|
+| Sidebar toggle | Left of brand name | SVG panel-layout icon, reflects open/closed state |
+| Theme toggle | Right side, before avatar | SVG sun (shown in dark mode) / moon (shown in light mode) |
+
+Both use the `.icon-btn` class. Always use SVG icons — never emoji or Unicode characters — to ensure consistent stroke weight across platforms and themes.
+
+### Image lightbox
+
+Clicking any image in a message opens a full-screen lightbox. The lightbox is self-contained in the `MessageImage` component (`MessageBubble.tsx`) — no global state required.
+
+**Behaviour:**
+- Click image thumbnail → opens lightbox
+- Click backdrop or × button → closes
+- Press `Esc` → closes (keydown listener attached only while open, removed on close)
+- Click the enlarged image itself → does nothing (stopPropagation)
+- If the message has a caption, it is displayed below the image in the lightbox
+
+**CSS classes:** `.lightbox-overlay` (fixed, `z-index: 200`), `.lightbox-content` (flex column wrapper), `.lightbox-img`, `.lightbox-caption`, `.lightbox-close`.
+
+The overlay is always dark (`rgba(0,0,0,0.9)`) regardless of the active theme — this is intentional for image viewing.
+
+### Image upload button
+
+The attach-image button in `MessageInput` uses an SVG photo icon (rectangle frame + circle + landscape path), consistent with all other icon buttons in the app. It is a `38×38px` box styled with `.upload-icon-btn`, matching the height of the Send button. When an upload is in progress the icon is replaced by the standard `.btn-spinner`.
+
+**Rule:** never use emoji for UI controls. All icons must be inline SVG with `stroke="currentColor"` or `fill="currentColor"` so they adapt to both themes automatically.
 
 ---
 

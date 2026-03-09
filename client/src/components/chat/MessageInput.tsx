@@ -115,9 +115,13 @@ export function MessageInput({
           type="button"
         >
           {isUploading ? (
-            <span className="btn-spinner" style={{ borderTopColor: '#888' }} />
+            <span className="btn-spinner" style={{ borderTopColor: 'currentColor', borderColor: 'rgba(0,0,0,0.15)' }} />
           ) : (
-            '🖼'
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1.5" y="3" width="15" height="12" rx="2" />
+              <circle cx="6" cy="7.5" r="1.25" />
+              <path d="M1.5 13l4-4 2.5 2.5 3-3.5 5 5" />
+            </svg>
           )}
         </button>
         <textarea

@@ -8,6 +8,7 @@ import { Input } from '../shared/Input';
 import { Button } from '../shared/Button';
 import { Avatar } from '../shared/Avatar';
 import { useChatStore } from '../../store/chatStore';
+import { useUiStore } from '../../store/uiStore';
 import { useRooms } from '../../hooks/useRooms';
 import * as dmApi from '../../api/dmApi';
 import type { User } from '../../types';
@@ -20,6 +21,7 @@ export function Sidebar() {
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const setActiveView = useChatStore((s) => s.setActiveView);
+  const sidebarOpen = useUiStore((s) => s.sidebarOpen);
   useRooms(); // ensures rooms are fetched
 
   const handleSearch = async (q: string) => {
@@ -44,7 +46,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar${sidebarOpen ? '' : ' sidebar-collapsed'}`}>
       <RoomList onBrowse={() => setModal('browse')} />
       <DMList onSearchUser={() => setModal('search')} />
 
