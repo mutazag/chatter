@@ -3,10 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { env } from './config/env.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import authRoutes from './routes/authRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
 import dmRoutes from './routes/dmRoutes.js';
