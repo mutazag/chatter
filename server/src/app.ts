@@ -2,7 +2,11 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { env } from './config/env.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import authRoutes from './routes/authRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
 import dmRoutes from './routes/dmRoutes.js';
@@ -43,6 +47,15 @@ export function createApp() {
   });
 
   app.use(errorMiddleware);
+
+  // Serve React SPA in production (client/dist copied to /public in Docker image)
+  if (env.NODE_ENV === 'production') {
+    const publicPath = path.join(__dirname, '../public');
+    app.use(express.static(publicPath));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(publicPath, 'index.html'));
+    });
+  }
 
   return app;
 }
