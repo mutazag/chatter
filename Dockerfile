@@ -23,6 +23,9 @@ RUN npm run build --workspace=server
 # Stage 2: Production image
 FROM node:22-alpine
 
+# Required for Prisma to detect OpenSSL version and load the correct engine binary
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 # Copy server build output
