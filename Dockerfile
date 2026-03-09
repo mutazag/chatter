@@ -34,7 +34,7 @@ RUN npm ci --omit=dev
 
 # Copy Prisma schema and generated client
 COPY --from=builder /app/server/prisma ./prisma
-COPY --from=builder /app/server/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Copy React build as static assets served by Express
 COPY --from=builder /app/client/dist ./public
